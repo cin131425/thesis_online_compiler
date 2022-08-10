@@ -21,9 +21,7 @@
   <script src="js/vendor/jquery-1.12.0.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-  <!-- <script src="https://codemirror.net/addon/comment/comment.js"></script> -->
   <script src="https://codemirror.net/addon/mode/simple.js"></script>
-  <!-- <script src="https://codemirror.net/mode/python/python.js"></script> -->
   <script src="comment.js"></script>
   <script src="commentcontinue.js"></script>
   <script src="js/session-timeout.js"></script>
@@ -32,12 +30,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
   <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
     integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 </head>
 
 <body id="body">
@@ -97,24 +93,15 @@
         <!-- method = "post" -->
         <!-- 當submit form 時，將透過post的方法將name中值傳送給compile.php -->
         <form action="compile.php" id="form" name="f2" method="POST">
-          <!-- Choose language -->
           <div style="display: flex; flex-direction: column;width: 40%; border: solid 1px #eee;">
             <div class="nav_bar">
               <div>
                 <span for="lang" style="font-weight: 600; padding-right: 4px;">Language: </span>
                 <span id="codingLanguage"></span>
-                <!-- <select name="language" id="language" onchange="selectLanguage(this.value,true)" disabled>
-                  <option value="python3">Python 3</option>
-                  <option value="cpp">C++</option>
-                  <option value="java">Java</option>
-                </select> -->
-                <!-- <option value="c">C</option> -->
-                <!-- <option value="cpp11">C++11</option> -->
               </div>
               <div class="time">
                 <span style="display: flex;align-items: center;column-gap: 4px;">
                   <img src="img/timer_black_24dp.svg">
-                  <!-- <span>時間</span> -->
                 </span>
                 <span>{{passTime}}</span>
               </div>
@@ -155,18 +142,6 @@
                   <div style="position: relative; width: 100%;" id="tabChart-outside">
                     <canvas id="tabChart"></canvas>
                   </div>
-                  <!-- <div style="position: relative; width: 49%;">
-                    <canvas id="q_mouseChart"></canvas>
-                  </div>
-                  <div style="position: relative; width: 49%;">
-                    <canvas id="keyboardFeq"></canvas>
-                  </div> -->
-                  <!-- <div style="position: relative; width: 49%;">
-                  <canvas id="backspaceTime"></canvas>
-                </div>
-                <div style="position: relative; width: 49%;">
-                  <canvas id="deleteTime"></canvas>
-                </div> -->
                 </div>
               </div>
             </div>
@@ -227,14 +202,8 @@
                 <label for="ta">Write Your Code</label>
                 <img class="refresh" src="img/refresh_black_24dp.svg">
                 <div style="position: relative; display: flex;">
-                  <!-- <div class="codeIndex">
-                  <div v-for="column in columnIndex">
-                    {{column}}
-                  </div>
-                </div> -->
                   <div style="width: 100%; border: solid 1px #ccc; border-radius: 4px;">
                     <textarea id="codebox" class="form-control codeplace" name="code" rows="50" cols="50"></textarea>
-                    <!-- <div class="circle"></div> -->
                   </div>
                 </div>
               </div>
@@ -275,7 +244,6 @@
         <!-- output area -->
         <br>
         <div class="answer-content outputMouse">
-          <!-- <textarea id='outputBox' class="form-control" name="output" rows="10" cols="50" readonly></textarea> -->
           <div id="outputBox"
             style="height: 300px; border: solid 1px #ccc; background: #eee; border-radius: 4px; overflow-y: scroll;">
           </div>
@@ -299,13 +267,6 @@
               <pre v-for="error in errorResult">
                   {{error}}
               </pre>
-              <!-- <hr>
-                <div>
-                  result temp
-                </div>
-                <pre v-for="result in resulttemp">
-                  {{result}}
-                </pre> -->
             </div>
           </div>
         </div>
@@ -315,7 +276,6 @@
     </div>
   </div>
   </div>
-  <!-- <script src="js/index.js"></script> -->
 
   <script type="text/javascript">
     easyQuestion = [
@@ -565,10 +525,7 @@
       var currentMillisecondsPassed = new Date().getTime() - nowTimestart;
       var passedTimeDB = convertSecondsToHhMmSs(currentMillisecondsPassed);
 
-      // console.log(tempTime);
-      // console.log(passedTimeDB);
       if (tempTime != "00:00:00") {
-        // console.log(addTimes(tempTime, passedTimeDB));
         passedTimeDB = addTimes(tempTime, passedTimeDB);
         tempTime = "00:00:00";
       }
@@ -685,7 +642,6 @@
             localStorage.setItem("storeLineData", localStoreLineData);
             storeTestBehaviorData();
             storeSubmitData();
-            // endChartFun();
             endTest();
           }
         }, 1000);
@@ -762,7 +718,6 @@
           finishTime = timestart + 5400000;
           localStorage.setItem('timestart', timestart);
           localStorage.setItem('finishTime', finishTime);
-          // localStorage.setItem("language", "cpp");
 
           vm.start = !vm.start;
           $("#body").css("overflow-y", "scroll");
@@ -806,10 +761,6 @@
       });
 
       var mouseCtx = $("#mouseChart");
-      // var q_mouseCtx = $("#q_mouseChart");
-      // var keyCtx = $("#keyboardFeq");
-      // var bsCtx = $("#backspaceTime");
-      // var deCtx = $("#deleteTime");
       var tabCtx = $("#tabChart");
 
       //儲存mouse軌跡
@@ -868,54 +819,7 @@
           }
         }
       });
-      // q_mouseChart = new Chart(q_mouseCtx, {
-      //   type: "scatter", // 圖表類型
-      //   data: q_mouseData,
-      //   options: {
-      //     scales: {
-      //       x: {
-      //         // suggestedMin: 0,
-      //         // suggestedMax: 1200
-      //       },
-      //       y: {
-      //         // suggestedMin: 0,
-      //         // suggestedMax: 1200
-      //       }
-      //     },
-      //     plugins: {
-      //       title: {
-      //         display: true,
-      //         text: 'Question Mouse Position Scatter Chart'
-      //       }
-      //     }
-      //   }
-      // });
-      // var keyboardChart = new Chart(keyCtx, {
-      //   type: 'bar',
-      //   data: {
-      //     labels: ['Tab', 'Delete', 'Backspace'],
-      //     datasets: [{
-      //       label: 'Keyboard Frequency',
-      //       data: [],
-      //       backgroundColor: [
-      //         'rgba(255, 99, 132, 0.2)',
-      //         'rgba(255, 159, 64, 0.2)',
-      //         'rgba(255, 205, 86, 0.2)']
-      //     }]
-      //   },
-      //   options: {
-      //     y: {
-      //       suggestedMin: 0,
-      //       suggestedMax: 100
-      //     },
-      //     plugins: {
-      //       title: {
-      //         display: true,
-      //         text: 'Keyboard Frequency Bar Chart'
-      //       }
-      //     }
-      //   }
-      // });
+
 
       var tabChart = new Chart(tabCtx, {
         type: 'bar',
@@ -984,7 +888,6 @@
               else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
                 mousePositionData2.question.push({ x: cursorPosTop, y: cursorPosLeft });
               }
-              // mouseData.datasets[0].data.push({ x: cursorPosTop, y: cursorPosLeft });
               mouseInCodeplace = false;
               mouseCap = 0;
             }
@@ -998,7 +901,6 @@
               else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
                 mousePositionData2.input.push({ x: cursorPosTop, y: cursorPosLeft });
               }
-              // mouseData.datasets[2].data.push({ x: cursorPosTop, y: cursorPosLeft });
               mouseInCodeplace = false;
               mouseCap = 0;
             }
@@ -1012,14 +914,9 @@
               else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
                 mousePositionData2.output.push({ x: cursorPosTop, y: cursorPosLeft });
               }
-              // mouseData.datasets[3].data.push({ x: cursorPosTop, y: cursorPosLeft });
               mouseInCodeplace = false;
               mouseCap = 0;
             }
-            // if(mouseInCodeplace = false){ //else area & code area //找出codearea mouseleave事件，stop interval
-
-            //   // mouseCap = 0;
-            // }
           }
           mouseCap += 1;
         }
@@ -1076,10 +973,6 @@
       })
 
       updateChartFun = function updataChart() {
-        // q_mouseChart.data = q_mouseData;
-        // keyboardChart.data.datasets[0].data[0] = vm.tabTime;
-        // keyboardChart.data.datasets[0].data[1] = vm.deleteTime;
-        // keyboardChart.data.datasets[0].data[2] = vm.backspaceTime;
         if (parseInt(localStorage.getItem('q_idx')) == 0) {
           mouseData.datasets[0].data = mousePositionData0.question;
           mouseData.datasets[1].data = mousePositionData0.code;
@@ -1098,50 +991,15 @@
           mouseData.datasets[2].data = mousePositionData2.input;
           mouseData.datasets[3].data = mousePositionData2.output;
         }
-        // console.log(mousePositionData0);
-        // console.log(mousePositionData1);
-        // console.log(mousePositionData2);
-        // console.log(mouseData.datasets);
         mouseChart.data = mouseData;
         countTabPerLine();
         tabChart.data.labels = columnIndex;
         tabChart.data.datasets[0].data = tabTimePerLine;
 
         mouseChart.update();
-        // q_mouseChart.update();
-        // keyboardChart.update();
+        
         tabChart.update();
       }
-
-      // endChartFun = function endChart() {
-      //   mouseData.datasets[0].data = [];
-      //   mouseData.datasets[1].data = [];
-      //   mouseData.datasets[2].data = [];
-      //   mouseData.datasets[3].data = [];
-      // }
-
-      // $("#chartbtn").click(
-      //   function () {
-      //     mouseChart.data = mouseData;
-      //     // q_mouseChart.data = q_mouseData;
-      //     // bsChart.data.datasets[0].data = backspaceTimePerLine;
-      //     // deChart.data.datasets[0].data = deleteTimePerLine;
-      //     // keyboardChart.data.datasets[0].data[0] = vm.tabTime;
-      //     // keyboardChart.data.datasets[0].data[1] = vm.deleteTime;
-      //     // keyboardChart.data.datasets[0].data[2] = vm.backspaceTime;
-      //     countTabPerLine();
-      //     tabChart.data.labels = columnIndex;
-      //     tabChart.data.datasets[0].data = tabTimePerLine;
-
-      //     mouseChart.update();
-      //     // q_mouseChart.update();
-      //     // keyboardChart.update();
-      //     tabChart.update();
-
-      //     // bsChart.update();
-      //     // deChart.update();
-      //   }
-      // )
     });
 
     //記錄下互動行為
@@ -1223,37 +1081,11 @@
         codeChange = false;
         getLogfile("submit");
         toggleQuestion(vm.questionNum);
-        // storeLineData = [];
-        // vm.codingMaxIndex = editor.getValue().split("\n").length;
-        // for (var i = 0; i < vm.codingMaxIndex; i++) {
-        //   storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
-        // }
+        
         vm.storeLineData = storeLineData;
 
         window.scrollTo(0, 0);
-        // endChartFun();
-        // console.log(q_submit);
-        // let q_submit_bool = true;
-        // q_submit.forEach(function (item) {
-        //   if (item == 0) {
-        //     q_submit_bool = false;
-        //   }
-        // });
-
-        // if (q_submit_bool) {
-        //   let submitResultFinal = confirm('You are already finish all the test, do you want to end the test?');
-        //   if (submitResultFinal) {
-        //     updateChartFun();
-        //     localStoreLineData = JSON.stringify(storeLineData);
-        //     localStorage.setItem('content', editor.getValue());
-        //     localStorage.setItem("storeLineData", localStoreLineData);
-        //     storeTestBehaviorData();
-        //     storeSubmitData();
-        //     // endChartFun();
-        //     //結束測試
-        //     endTest();
-        //   }
-        // }
+       
       } else {
         console.log("cancel!!");
       }
@@ -1287,8 +1119,6 @@
 
     //選擇的程式語言
     function selectLanguage(list) {
-      // let languageConfirm = confirm('If you change the language, the original code will lost. Are you sure to change it?');
-      // if (languageConfirm) {
       localStorage.setItem("language", list);
       switch (list) {
         case 'c++':
@@ -1314,10 +1144,6 @@
         storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
       }
       vm.storeLineData = storeLineData;
-      // }
-      // else {
-      //   document.querySelector("#language").value = localStorage.getItem("language");
-      // }
     }
 
     var testCaseIndex = 0;
