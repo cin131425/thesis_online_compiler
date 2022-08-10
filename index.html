@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>TEST COMPILER</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/interface.css">
+  <link rel="stylesheet" href="css/prism.css">
+  <link rel="icon" type="image/png" href="img/ruet.png">
+  <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+  <script src="js/vendor/jquery-1.12.0.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+  <!-- <script src="https://codemirror.net/addon/comment/comment.js"></script> -->
+  <script src="https://codemirror.net/addon/mode/simple.js"></script>
+  <!-- <script src="https://codemirror.net/mode/python/python.js"></script> -->
+  <script src="comment.js"></script>
+  <script src="commentcontinue.js"></script>
+  <script src="js/session-timeout.js"></script>
+  <script src="https://codemirror.net/addon/edit/closebrackets.js"></script>
+  <script src="https://codemirror.net/addon/edit/matchbrackets.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+  <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<body id="body">
+  <div id="app">
+    <div class="home" v-if="!start">
+      <div class="personalInformation">
+        <form class="personalInformation_inside" action="get-data.php" id="testerForm" name="f1" method="POST">
+          <div style="width: 100%">
+            <div>Tester id :</div>
+            <input type="text" class="inputcolumn" id="testerid" title="Your id" name="testerid" v-model="userid"
+              placeholder="your id" readonly>
+          </div>
+          <div style="width: 100%">
+            <input type="text" class="inputcolumn" id="testerAge" title="Your age" name="testerAge" v-model="userAge"
+              placeholder="your age">
+          </div>
+          <div style="width: 100%">
+            <input type="text" class="inputcolumn" id="testerMajor" title="Your major" name="testerMajor"
+              v-model="userMajor" placeholder="your major">
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column;">
+            <span style="text-align: justify; border-top: solid 1px #ccc; padding-top: 12px; margin-bottom: 8px;">How
+              many years of programming experience do you have?</span>
+            <select name="codeExperience" id="codeExperience" style="height: 30px;">
+              <option value="less than 3 years">less than 3 years</option>
+              <option value="3 years">3 years</option>
+              <option value="4 years">4 years</option>
+              <option value="5 years">5 years</option>
+              <option value="6 years">6 years</option>
+              <option value="more than 6 years">more than 6 years</option>
+            </select>
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column;">
+            <span style="text-align: justify; border-top: solid 1px #ccc; padding-top: 12px; margin-bottom: 8px;">Choose
+              Language</span>
+            <select name="language" id="language" onchange="selectLanguage(this.value)" style="height: 30px;">
+              <option value="Python">Python</option>
+              <option value="c++">C++</option>
+              <option value="Java">Java</option>
+            </select>
+          </div>
+          <button class="startbtn" type="submit">
+            Start
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="mainContainer">
+      <div class="toolBar">
+        <span onclick="toggleQuestion(0)" v-bind:class="[questionNum == 0?'qSelected':'qUnselected']">1</span>
+        <span onclick="toggleQuestion(1)" v-bind:class="[questionNum == 1?'qSelected':'qUnselected']">2</span>
+        <span onclick="toggleQuestion(2)" v-bind:class="[questionNum == 2?'qSelected':'qUnselected']">3</span>
+        <span class="endBtn" onclick="endTestBtn()">End</span>
+      </div>
+
+      <div class="form-group" style="width: 100%;">
+        <!-- method = "post" -->
+        <!-- 當submit form 時，將透過post的方法將name中值傳送給compile.php -->
+        <form action="compile.php" id="form" name="f2" method="POST">
+          <!-- Choose language -->
+          <div style="display: flex; flex-direction: column;width: 40%; border: solid 1px #eee;">
+            <div class="nav_bar">
+              <div>
+                <span for="lang" style="font-weight: 600; padding-right: 4px;">Language: </span>
+                <span id="codingLanguage"></span>
+                <!-- <select name="language" id="language" onchange="selectLanguage(this.value,true)" disabled>
+                  <option value="python3">Python 3</option>
+                  <option value="cpp">C++</option>
+                  <option value="java">Java</option>
+                </select> -->
+                <!-- <option value="c">C</option> -->
+                <!-- <option value="cpp11">C++11</option> -->
+              </div>
+              <div class="time">
+                <span style="display: flex;align-items: center;column-gap: 4px;">
+                  <img src="img/timer_black_24dp.svg">
+                  <!-- <span>時間</span> -->
+                </span>
+                <span>{{passTime}}</span>
+              </div>
+            </div>
+
+            <div class="question">
+              <div>
+                {{selectQuestion.description}}
+              </div>
+              <pre v-if="selectQuestion.explanation1 !=''">{{selectQuestion.explanation}}</pre>
+              <div>
+                <b>Return</b>
+              </div>
+              <ul>
+                <li>
+                  {{selectQuestion.return}}
+                </li>
+              </ul>
+              <div>
+                <b>Sample Input</b>
+              </div>
+              <div v-if="selectQuestion.inputNote!=''">{{selectQuestion.inputNote}}</div>
+              <pre>{{selectQuestion.sampleInput}}</pre>
+              <div>
+                <b>Sample Output</b>
+              </div>
+              <pre>{{selectQuestion.sampleOutput}}</pre>
+            </div>
+            <div class="chart" style="user-select: none; ">
+              <div id="chartbtn">
+                <span>View Chart</span>
+              </div>
+              <div class="record_content">
+                <div style="display: flex; flex-wrap: wrap; column-gap: 2%;">
+                  <div style="position: relative; width: 100%;" id="mouseChart-outside">
+                    <canvas id="mouseChart"></canvas>
+                  </div>
+                  <div style="position: relative; width: 100%;" id="tabChart-outside">
+                    <canvas id="tabChart"></canvas>
+                  </div>
+                  <!-- <div style="position: relative; width: 49%;">
+                    <canvas id="q_mouseChart"></canvas>
+                  </div>
+                  <div style="position: relative; width: 49%;">
+                    <canvas id="keyboardFeq"></canvas>
+                  </div> -->
+                  <!-- <div style="position: relative; width: 49%;">
+                  <canvas id="backspaceTime"></canvas>
+                </div>
+                <div style="position: relative; width: 49%;">
+                  <canvas id="deleteTime"></canvas>
+                </div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="answer">
+            <div class="answer-content">
+              <div class="record" style="display: none;">
+                <div class="recordbtn" onclick="openDetail(0)">
+                  <img src="img/expand_less_black_24dp.svg" v-if="open_record">
+                  <img src="img/expand_more_black_24dp.svg" v-if="!open_record">
+                  <span>View Record</span>
+                </div>
+                <div class="record_content" v-if="open_record">
+                  <div class="column">每個按鍵點擊次數:</div>
+                  <ul>
+                    <li class="click" v-for="key in keyboard_press">{{key.key}}:{{key.click}}</li>
+                  </ul>
+                  <div class="column">Commit: {{commitTime}}</div>
+                  <div class="column">Backspace: {{backspaceTime}}</div>
+                  <div class="column">Delete: {{deleteTime}}</div>
+                  <div class="column">Tab: {{tabTime}}</div>
+                  <hr>
+                  <div class="column">文數字數量(含enter): {{textLength}}</div>
+                  <div class="column">Current Line Number:{{currentLineNumber}}</div>
+                  <div class="column">Current Column Index:{{currentColumnIndex}}</div>
+                  <div class="column">Max Line Number:{{codingMaxIndex}}</div>
+                  <div class="column">position X:{{pageX}}</div>
+                  <div class="column">position Y:{{pageY}}</div>
+                  <div class="column">Run code 點擊次數: {{run_code}}</div>
+                  <div>
+                    <div class="column">Input content:</div>
+                    <ul>
+                      <li class="note" v-for="code in codes">{{code}}</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div class="column">複製次數:{{copy}}</div>
+                    <div class="column">剪下次數:{{cut}}</div>
+                    <div class="column">貼上次數:{{paste}}</div>
+                    <div class="column">undo:{{undo}}</div>
+                    <div class="column">redo:{{redo}}</div>
+                  </div>
+                  <div class="column">
+                    Line Data:{{storeLineData}}
+                  </div>
+                  <div class="column">
+                    Line Data length:{{storeLineData.length}}
+                  </div>
+                  <br>
+                  <br>
+                </div>
+              </div>
+
+
+              <!-- write code area -->
+              <div>
+                <label for="ta">Write Your Code</label>
+                <img class="refresh" src="img/refresh_black_24dp.svg">
+                <div style="position: relative; display: flex;">
+                  <!-- <div class="codeIndex">
+                  <div v-for="column in columnIndex">
+                    {{column}}
+                  </div>
+                </div> -->
+                  <div style="width: 100%; border: solid 1px #ccc; border-radius: 4px;">
+                    <textarea id="codebox" class="form-control codeplace" name="code" rows="50" cols="50"></textarea>
+                    <!-- <div class="circle"></div> -->
+                  </div>
+                </div>
+              </div>
+              <br>
+              <!-- input area -->
+            </div>
+            <div class="nav_bar inputMouse">
+              <label for="in">Input</label>
+              <div class="radioSet">
+                <input type="radio" onchange="selectTest(0)" name="testCase" value="testCase1" id="testCase1"
+                  Checked="True">
+                <label for="testCase1">Test case 1</label>
+                <input type="radio" onchange="selectTest(1)" name="testCase" value="testCase2" id="testCase2">
+                <label for="testCase2">Test case 2</label>
+                <input type="radio" onchange="selectTest(2)" name="testCase" value="testCase3" id="testCase3">
+                <label for="testCase3">Test case 3</label>
+                <input type="radio" onchange="selectTest(3)" name="testCase" value="Customization" id="Customization">
+                <label for="Customization">Customization</label>
+              </div>
+            </div>
+            <div class="answer-content inputMouse">
+              <textarea id="inputbox" class="form-control inputArea" name="input" rows="10" cols="50"
+                readonly></textarea><br>
+            </div>
+            <!-- run code button -->
+            <div class="nav_bar outputMouse">
+              <div style="display: flex; column-gap: 24px; align-items: center;">
+                <label for="out">Output</label>
+                <span>{{expectOutput == undefined?"":"Expected Output:"}} {{expectOutput}}</span>
+              </div>
+              <div class="excutebtn">
+                <input type="submit" id="st" class="buttonStyle" value="▶  Run Code" name="run">
+                <input type="button" class="buttonStyle" id="submitbtn" onclick="windowPopUp()" value="Submit">
+              </div>
+            </div>
+        </form>
+
+        <!-- output area -->
+        <br>
+        <div class="answer-content outputMouse">
+          <!-- <textarea id='outputBox' class="form-control" name="output" rows="10" cols="50" readonly></textarea> -->
+          <div id="outputBox"
+            style="height: 300px; border: solid 1px #ccc; background: #eee; border-radius: 4px; overflow-y: scroll;">
+          </div>
+        </div>
+
+        <div class="chart" style="user-select: none; display: none;">
+          <div class="submit_content" v-if="submit">
+            <div>
+              Max line: {{codingMaxIndex}}
+            </div>
+            <hr>
+            <div>
+              Success Result
+              <pre v-for="success in successResult">
+                  {{success}}
+                </pre>
+              <hr>
+              <div>
+                Wrong Result
+              </div>
+              <pre v-for="error in errorResult">
+                  {{error}}
+              </pre>
+              <!-- <hr>
+                <div>
+                  result temp
+                </div>
+                <pre v-for="result in resulttemp">
+                  {{result}}
+                </pre> -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  </div>
+  <!-- <script src="js/index.js"></script> -->
+
+  <script type="text/javascript">
+    easyQuestion = [
+      {
+        "title": "Electronics Shop",
+        "description": "A person wants to determine the most expensive computer keyboard and USB drive that can be purchased with a given budget. Given price-lists for keyboards and USB drives and a budget, find the cost to buy them.",
+        "explanation": "budget = 60  keyboards = [40, 50, 60] drives = [5, 8, 12]\nThe person can buy (40 keyboards + 12 USB drives = 52), or (50 keyboards + 8 USB drives = 58). Choose the latter as the more expensive option and return 58.\nNote: If it is not possible to buy both items, return -1",
+        "return": "int: the maximum that can be spent, or -1 if it is not possible to buy both items",
+        "inputNote": "The first line contains three space-separated integers the budget, the length of keyboard models(n) and the length of USB drive models(m). The second line contains n space-separated integers keyboards[i], the prices of each keyboard model. The third line contains m space-separated integers drives[i], the prices of the USB drives.",
+        "sampleInput": "5 1 1\n4\n5",
+        "sampleOutput": "-1",
+        "url": "https://www.hackerrank.com/challenges/electronics-shop/problem?isFullScreen=true",
+        "testCases": [{
+          "testCase": "5 1 1\n4\n5",
+          "ans": "-1"
+        }, {
+          "testCase": "10 2 3\n3 1\n5 2 8",
+          "ans": "9"
+        }, {
+          "testCase": "20 5 6\n2 4 3 6 8\n5 1 4 7 9 10",
+          "ans": "18"
+        }],
+        "pythonText": "def countMaximum(keyboards, pendrives, budget):\n# 	write your code here\n\n\treturn 0\n\ns, n, m = map(int, input().split())\narr = input()\nkeyboards = list(map(int, arr.split(' ')))\narr2 = input()\npendrives = list(map(int, arr2.split(' ')))\nprint(countMaximum(keyboards, pendrives, s))",
+        "cppCodeText1": "int countMaximum(int keyboards[], int pendrives[], int budget, int keyboards_len, int pendrives_len){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint budget;\n\tint n;\n\tint m;\n\tcin >> budget >> n >> m;\n\tint keyboard[n];\n\tint pendrives[m];\n\tfor(int i=0;i<n;i++) {\n\t\tcin >> keyboard[i];\n\t}\n\tfor(int i=0;i<m;i++) {\n\t\tcin >> pendrives[i];\n\t}\n\tcout << countMaximum(keyboard, pendrives, budget, n, m);",
+        "javaCodeText": "int budget = in.nextInt();\n\t\tint n = in.nextInt();\n\t\tint m = in.nextInt();\n\t\tint[] keyboards = new int[n];\n\t\tfor(int keyboards_i=0; keyboards_i < n; keyboards_i++){\n\t\t\tkeyboards[keyboards_i] = in.nextInt();\n\t\t}\n\t\tint[] pendrives = new int[m];\n\t\tfor(int pendrives_i=0; pendrives_i < m; pendrives_i++){\n\t\t\tpendrives[pendrives_i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(countMaximum(keyboards, pendrives, budget));\n\t}\n\n\tpublic static int countMaximum(int keyboards[], int pendrives[], int budget) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Jumping on the Clouds",
+        "description": "There is a new mobile game that starts with consecutively numbered clouds. Some of the clouds are thunderheads and others are cumulus. The player can jump on any cumulus cloud having a number that is equal to the number of the current cloud plus 1 or 2. The player must avoid the thunderheads. Determine the minimum number of jumps it will take to jump from the starting position to the last cloud. It is always possible to win the game.\nFor each game, you will get an array of clouds numbered 0 if they are safe or 1 if they must be avoided.",
+        "explanation": "c = [0, 1, 0, 0, 0, 1, 0]\nIndex the array from 0…6. The number on each cloud is its index in the list so the player must avoid the clouds at indices 1 and 5. They could follow these two paths: 0 → 2 → 4 → 6 or 0 → 2 → 3 → 4 → 6. The first path takes 3 jumps while the second takes 4. Return 3.",
+        "return": "int: the minimum number of jumps required",
+        "inputNote": "The first line contains an integer n, the total number of clouds. The second line contains n space-separated binary integers describing clouds c[i]",
+        "sampleInput": "7\n0 0 1 0 0 1 0",
+        "sampleOutput": "4",
+        "url": "",
+        "testCases": [{
+          "testCase": "7\n0 0 1 0 0 1 0",
+          "ans": "4"
+        }, {
+          "testCase": "6\n0 0 0 0 1 0",
+          "ans": "3"
+        }, {
+          "testCase": "5\n0 1 0 1 0",
+          "ans": "2"
+        }],
+        "pythonText": "def jumpCount(c):\n# 	write your code here\n\n\treturn 0\n\nn = map(int,input().split())\narr = input()\nc = list(map(int, arr.split(' ')))\nprint(jumpCount(c))",
+        "cppCodeText1": "int jumpCount(int c[], int n){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint n;\n\tcin >> n;\n\tint c[n];\n\tfor(int i=0;i<n;i++) {\n\t\tcin >> c[i];\n\t}\n\tcout << jumpCount(c, n);",
+        "javaCodeText": "int n = in.nextInt();\n\t\tint[] c = new int[n];\n\t\tfor(int i = 0; i < n; i++){\n\t\t\tc[i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(jumpCount(c));\n\t}\n\n\tpublic static int jumpCount(int c[]) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Find the pair",
+        "description": "There is a large pile of socks that must be paired by color. Given an array of integers representing the color of each sock, determine how many pairs of socks with matching colors there are.",
+        "explanation": "n = 7  lists = [1, 2, 1, 2, 1, 3, 2]\nThere is one pair of color 1 and one of color 2. There are three odd socks left, one of each color. The number of pairs is 2.",
+        "return": "int: the number of pairs",
+        "inputNote": "The first line contains an integer n, the total number of lists. The second line contains n space-separated binary integers describing lists[i]",
+        "sampleInput": "7\n1 2 1 2 1 3 2",
+        "sampleOutput": "2",
+        "url": "",
+        "testCases": [{
+          "testCase": "7\n1 2 1 2 1 3 2",
+          "ans": "2"
+        }, {
+          "testCase": "9\n10 20 20 10 10 30 50 10 20",
+          "ans": "3"
+        }, {
+          "testCase": "6\n1 2 3 4 5 8",
+          "ans": "0"
+        }],
+        "pythonText": "def findPair(c):\n# 	write your code here\n\n\treturn 0\n\nn = map(int,input().split())\narr = input()\nc = list(map(int, arr.split(' ')))\nprint(findPair(c))",
+        "cppCodeText1": "int findPair(int c[], int n){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint n;\n\tcin >> n;\n\tint c[n];\n\tfor(int i=0;i<n;i++) {\n\t\tcin >> c[i];\n\t}\n\tcout << findPair(c, n);",
+        "javaCodeText": "int n = in.nextInt();\n\t\tint[] c = new int[n];\n\t\tfor(int i = 0; i < n; i++){\n\t\t\tc[i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(findPair(c));\n\t}\n\n\tpublic static int findPair(int c[]) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Sales by Match",
+        "description": "A person was asked to go to the bookstore to buy the pen. He can only buy two items, and all the money that needs to be spent, otherwise he wouldn't buy. Given the available amount and the price list of all the pens in the bookstore, please find out all the combinations that can be purchased in this amount. \nNote: The solution set must not contain duplicate combinations.(unless ther are the same price in the list)",
+        "explanation": "money = 9  lists = [1, 4, 2, 3, 5, 6, 10]\nThe person has options of 4+5 = 9 or 3+6 = 9, so return those combinations.\nNote: Returns [] if no combination exists",
+        "return": "int[q]: all the combinations that can met the amount, or [] if no combination exists",
+        "inputNote": "The first line contains two space-separated integers,money and the number of lists. The second line contains n space-separated binary integers describing number lists[i]",
+        "sampleInput": "9 7\n1 4 2 3 5 6 10",
+        "sampleOutput": "[[4, 5],[3, 6]]",
+        "url": "https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/",
+        "testCases": [{
+          "testCase": "9 7\n1 4 2 3 5 6 10",
+          "ans": "[[4, 5],[3, 6]]"
+        }, {
+          "testCase": "7 4\n1 4 2 7",
+          "ans": "[]"
+        }, {
+          "testCase": "10 6\n1 2 3 2 5 8",
+          "ans": "[[2, 8],[2, 8]]"
+        }],
+        "pythonText": "def match(money, lists):\n# 	write your code here\n\t\n\treturn 0\n\nmoney, n = map(int,input().split())\narr = input()\nlists = list(map(int, arr.split(' ')))\nprint(match(money, lists))",
+        "cppCodeText1": "vector<vector<int>> match(int money, vector<int> lists, int n){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint money;\n\tint n;\n\tcin >> money >> n;\n\tvector<int> lists;\n\tfor(int i=0;i<n;i++) {\n\t\tint temp;\n\t\tcin >> temp;\n\t\tlists.push_back(temp);\n\t}\n\tvector<vector<int>> result = match(money, lists, n);\n\tcout << '[';\n\tfor(int i = 0;i<result.size();i++){\n\t\tcout << '[';\n\t\tfor(int j = 0;j<result[i].size();j++){\n\t\t\tcout << result[i][j] ;\n\t\t\tif(j < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t\t}\n\t\t}\n\t\tcout << ']';\n\t\tif(i < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t}\n\t}\n\tcout << ']';",
+        "javaCodeText": "int money = in.nextInt();\n\t\tint n = in.nextInt();\n\t\tint[] lists = new int[n];\n\t\tfor(int i = 0; i < n; i++){\n\t\t\tlists[i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(match(money, lists));\n\t}\n\n\tpublic static List<Integer> match(int money, int lists[]) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Combination Sum (unique)",
+        "description": "Given a target number and a collection of candidate numbers, find all unique combinations in candidates where the candidate numbers sum to target.\nEach number in candidates may only be used once in the combination.\nNote: The solution set must not contain duplicate combinations.",
+        "explanation": "target = 5  candidates = [2, 5, 2, 1, 2]\nThere are the combination of 1+2+2 = 5 or 5 = 5, so return [1, 1, 2] and [5].\nNote: Returns [ ] if no combination exists",
+        "return": "int[q]: all unique combinations of candidates, or [ ] if no combination exists",
+        "inputNote": "The first line contains two space-separated integers,target and the number of candidates. The second line contains n space-separated binary integers describing number candidates[i]",
+        "sampleInput": "5 5\n2 5 2 1 2",
+        "sampleOutput": "[[1, 2, 2], [5]]",
+        "url": "",
+        "testCases": [{
+          "testCase": "5 5\n2 5 2 1 2",
+          "ans": "[[1, 2, 2], [5]]"
+        }, {
+          "testCase": "1 1\n2",
+          "ans": "[]"
+        }, {
+          "testCase": "8 7\n10 1 2 7 6 1 5",
+          "ans": "[[1, 1, 6], [1, 2, 5], [1, 7], [2, 6]]"
+        }],
+        "pythonText": "def combinationSum(target, candidates):\n# 	write your code here\n\t\n\treturn 0\n\ntarget, n = map(int,input().split())\narr = input()\ncandidates = list(map(int, arr.split(' ')))\nprint(combinationSum(target, candidates))",
+        "cppCodeText1": "vector<vector<int>> combinationSum(int target, vector<int> candidates, int n){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint target;\n\tint n;\n\tcin >> target >> n;\n\tvector<int> candidates;\n\tfor(int i=0;i<n;i++) {\n\t\tint temp;\n\t\tcin >> temp;\n\t\tcandidates.push_back(temp);\n\t}\n\tvector<vector<int>> result = combinationSum(target, candidates, n);\n\tcout << '[';\n\tfor(int i = 0;i<result.size();i++){\n\t\tcout << '[';\n\t\tfor(int j = 0;j<result[i].size();j++){\n\t\t\tcout << result[i][j] ;\n\t\t\tif(j < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t\t}\n\t\t}\n\t\tcout << ']';\n\t\tif(i < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t}\n\t}\n\tcout << ']';",
+        "javaCodeText": "int target = in.nextInt();\n\t\tint n = in.nextInt();\n\t\tint[] candidates = new int[n];\n\t\tfor(int i = 0; i < n; i++){\n\t\t\tcandidates[i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(combinationSum(target, candidates));\n\t}\n\n\tpublic static List<Integer> combinationSum(int target, int candidates[]) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Combination Sum (mutiple)",
+        "description": "Given an array of distinct integers named “candidates” and a target integer, return a list of all unique combinations of candidates where the chosen numbers sum to target. You may return the combinations in any order.\nThe same number may be chosen from candidates an unlimited number of times. Two combinations are unique if the frequency of at least one of the chosen numbers is different.",
+        "explanation": "target = 7  candidates = [2, 3, 6, 7]\n2 and 3 are candidates, and 2 + 2 + 3 = 7. Note that 2 can be used multiple times.\n7 is a candidate, and 7 = 7. These are the only two combinations [2, 2, 3] and [7].\nNote: Returns [ ] if no combination exists",
+        "return": "int[q]: all unique combinations of candidates, or [ ] if no combination exists",
+        "inputNote": "The first line contains two space-separated integers,target and the number of candidates. The second line contains n space-separated binary integers describing number candidates[i]",
+        "sampleInput": "7 3\n2 3 5",
+        "sampleOutput": "[[2, 2, 3], [2, 5]]",
+        "url": "https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/",
+        "testCases": [{
+          "testCase": "7 3\n2 3 5",
+          "ans": "[[2, 2, 3], [2, 5]]"
+        }, {
+          "testCase": "1 1\n2",
+          "ans": "[]"
+        }, {
+          "testCase": "8 3\n2 3 5",
+          "ans": "[[2, 2, 2, 2], [2, 3, 3], [3, 5]]"
+        }],
+        "pythonText": "def combinationSum(target, candidates):\n# 	write your code here\n\t\n\treturn 0\n\ntarget, n = map(int,input().split())\narr = input()\ncandidates = list(map(int, arr.split(' ')))\nprint(combinationSum(target, candidates))",
+        "cppCodeText1": "vector<vector<int>> combinationSum(int target, vector<int> candidates, int n){\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint target;\n\tint n;\n\tcin >> target >> n;\n\tvector<int> candidates;\n\tfor(int i=0;i<n;i++) {\n\t\tint temp;\n\t\tcin >> temp;\n\t\tcandidates.push_back(temp);\n\t}\n\tvector<vector<int>> result = combinationSum(target, candidates, n);\n\tcout << '[';\n\tfor(int i = 0;i<result.size();i++){\n\t\tcout << '[';\n\t\tfor(int j = 0;j<result[i].size();j++){\n\t\t\tcout << result[i][j] ;\n\t\t\tif(j < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t\t}\n\t\t}\n\t\tcout << ']';\n\t\tif(i < result[i].size()-1){\n\t\t\tcout << ',';\n\t\t}\n\t}\n\tcout << ']';",
+        "javaCodeText": "int target = in.nextInt();\n\t\tint n = in.nextInt();\n\t\tint[] candidates = new int[n];\n\t\tfor(int i = 0; i < n; i++){\n\t\t\tcandidates[i] = in.nextInt();\n\t\t}\n\t\tSystem.out.println(combinationSum(target, candidates));\n\t}\n\n\tpublic static List<Integer> combinationSum(int target, int candidates[]) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Largest Number After Digit Swaps by Parity",
+        "description": "You are given a positive integer num. You may swap any two digits of num that have the same parity (i.e. both odd digits or both even digits).",
+        "explanation": "num = 1234\nSwap the digit 3 with the digit 1, this results in the number 3214. Swap the digit 2 with the digit 4, this results in the number 3412. Note that there may be other sequences of swaps but it can be shown that 3412 is the largest possible number. Also, note that we may not swap the digit 4 with the digit 1 since they are of different parities.",
+        "return": "int: the largest possible value of num after any number of swaps.",
+        "inputNote": "",
+        "sampleInput": "1234",
+        "sampleOutput": "3412",
+        "url": "https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/",
+        "testCases": [{
+          "testCase": "1234",
+          "ans": "3412"
+        }, {
+          "testCase": "65875",
+          "ans": "87655"
+        }, {
+          "testCase": "756473",
+          "ans": "776453"
+        }],
+        "pythonText": "def swapNum(num):\n# 	write your code here\n\t\n\treturn 0\n\nx = input()\nprint(swapNum(x))",
+        "cppCodeText1": "int swapNum(int num) {\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint num;\n\tcin >> num;\n\tcout << swapNum(num);",
+        "javaCodeText": "int num = in.nextInt();\n\t\tSystem.out.println(swapNum(num));\n\t}\n\n\tpublic static int swapNum(int num) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      },
+      {
+        "title": "Sort Even and Odd Indices Independently",
+        "description": "You are given a positive integer. Reorder the position of each number according to the following rules:\n1. Sort the values at ”odd” indices of num in non-increasing order.\n2. Sort the values at ”even” indices of num in non-decreasing order.",
+        "explanation": "nums = 4123\nThe values at odd indices 1 and 3 are sorted in non-increasing order.\nThe values at even indices 0 and 2 are sorted in non-decreasing order.\nSo, return the answer 2341.",
+        "return": "int: after rearranging the values of nums.",
+        "inputNote": "",
+        "sampleInput": "4123",
+        "sampleOutput": "2341",
+        "url": "https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/",
+        "testCases": [{
+          "testCase": "4123",
+          "ans": "2341"
+        }, {
+          "testCase": "65875",
+          "ans": "57658"
+        }, {
+          "testCase": "21",
+          "ans": "21"
+        }],
+        "pythonText": "def reorderNum(num):\n# 	write your code here\n\t\n\treturn 0\n\nx = input()\nprint(reorderNum(x))",
+        "cppCodeText1": "int reorderNum(int num) {\n\t// write yor code here\n\n\treturn 0;\n}\n",
+        "cppCodeText2": "\tint num;\n\tcin >> num;\n\tcout << reorderNum(num);",
+        "javaCodeText": "int num = in.nextInt();\n\t\tSystem.out.println(reorderNum(num));\n\t}\n\n\tpublic static int reorderNum(int num) {\n\t// write your code here\n\n\t\treturn 0;\n\t}",
+      }
+    ]
+
+    var tabTimePerLine = [];
+    var storeLineData = [];
+    var selectQuestion = easyQuestion[0];
+    var nowQuestionIndex = 0;
+    var selectedSet = []; //user的題庫
+    var timestart;
+    var finishTime;
+    var updateChartFun;
+    // var endChartFun;
+    var localStoreLineData;
+    var tempTime = "00:00:00";
+
+    function makeid() {
+      var text = "";
+      var possible = "0123456789";
+
+      for (var i = 0; i < 9; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length))
+      }
+
+      return text;
+    }
+
+    function getRandomInt() { //選擇三題到題庫中
+      //max = easyQuestion.length
+      if (selectedSet.length == 0) {
+        var firstQ = Math.floor(getRandomArbitrary(0, 2));
+        selectedSet.push(firstQ);
+        var secondQ;
+        switch (firstQ) {
+          case 0: secondQ = Math.floor(getRandomArbitrary(4, 6)); break;
+          case 1: secondQ = Math.floor(getRandomArbitrary(2, 4)); break;
+        }
+        selectedSet.push(secondQ);
+        var thirdQ = Math.floor(getRandomArbitrary(6, 8));
+        selectedSet.push(thirdQ);
+      }
+      console.log(selectedSet);
+      localStorage.setItem('q_set', selectedSet);
+      nowQuestionIndex = selectedSet[0];
+    }
+
+    function getRandomArbitrary(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function storeSubmitData() {
+      // clearInterval(lt);
+
+      var currentMillisecondsPassed = new Date().getTime() - nowTimestart;
+      var passedTimeDB = convertSecondsToHhMmSs(currentMillisecondsPassed);
+
+      // console.log(tempTime);
+      // console.log(passedTimeDB);
+      if (tempTime != "00:00:00") {
+        // console.log(addTimes(tempTime, passedTimeDB));
+        passedTimeDB = addTimes(tempTime, passedTimeDB);
+        tempTime = "00:00:00";
+      }
+      var mouseImg = document.getElementById("mouseChart").toDataURL("image/png");
+      var tabImg = document.getElementById("tabChart").toDataURL("image/png");
+
+      let dbdata = {
+        "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+        "q_Idx": nowQuestionIndex,
+        "language": localStorage.getItem("language"),
+        "lineCount": vm.codingMaxIndex,
+        "wordCount": wordNumber,
+        "totalTime": passedTimeDB,
+        "result": 0,
+        "runCode": vm.run_code,
+        "mouse_position": mouseImg,
+        "tab_chart": tabImg,
+        "code": resultPreprocess(editor.getValue())
+      }
+      let postbody = JSON.stringify(dbdata);
+      // console.log(dbdata);
+
+      $.ajax({
+        type: "POST",
+        url: "get-submit.php",
+        data: postbody,
+        success: function (result) {
+          console.log(result);
+        },
+        error: function () {
+          console.log("submit js fail");
+        }
+      })
+
+    }
+
+    function storeTestBehaviorData() {
+
+      let convertTestBehaviorData = localStorage.getItem("storeLineData");
+      let jsonTestBehavior = JSON.parse(convertTestBehaviorData);
+      for (let i = 0; i < jsonTestBehavior.length; i++) {
+
+        let dbdata = {
+          "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+          "q_Idx": selectedSet[parseInt(localStorage.getItem('q_idx'))],
+          "line_Idx": i + 1,
+          "text": resultPreprocess(textValue[i]),
+          "time": jsonTestBehavior[i].time,
+          "copy": jsonTestBehavior[i].copy,
+          "cut": jsonTestBehavior[i].cut,
+          "paste": jsonTestBehavior[i].paste,
+          "undoTime": jsonTestBehavior[i].undo,
+          "redoTime": jsonTestBehavior[i].redo,
+          "bsTime": jsonTestBehavior[i].backspace,
+          "delTime": jsonTestBehavior[i].delete
+        }
+        // console.log(dbdata);
+        let jsonDataToSend = JSON.stringify(dbdata);
+        // console.log(dbdata.text);
+
+        $.ajax({
+          type: "POST",
+          url: "get-testbehavior.php",
+          data: jsonDataToSend,
+          success: function (result) {
+            // console.log(result);
+          },
+          error: function () {
+            console.log("test behavior js fail");
+          }
+        })
+      }
+    }
+
+    function storeTestContentData(type, content) {
+
+      let dbdata = {
+        "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+        "q_Idx": nowQuestionIndex,
+        "language": localStorage.getItem("language"),
+        "type": type,
+        "content": resultPreprocess(content),
+        "code": resultPreprocess(editor.getValue())
+      }
+      let jsonDataToSend = JSON.stringify(dbdata);
+
+
+      $.ajax({
+        type: "POST",
+        url: "get-testcontent.php",
+        data: jsonDataToSend,
+        success: function (result) {
+          console.log(result);
+        },
+        error: function () {
+          console.log("test content js fail");
+        }
+      })
+    }
+
+    function storeData() {
+
+      timeInterval = setInterval( //time out
+        function () {
+          let finishTimeVar = parseInt(localStorage.getItem('finishTime'));
+          let msPassed = finishTimeVar - new Date().getTime();
+          vm.passTime = convertSecondsToHhMmSs(msPassed);
+          // console.log(msPassed);
+          if (msPassed <= 0) {
+            alert('time out');
+            updateChartFun();
+            localStoreLineData = JSON.stringify(storeLineData);
+            localStorage.setItem('content', editor.getValue());
+            localStorage.setItem("storeLineData", localStoreLineData);
+            storeTestBehaviorData();
+            storeSubmitData();
+            // endChartFun();
+            endTest();
+          }
+        }, 1000);
+
+      storeInterval = setInterval(
+        function () {
+          localStoreLineData = JSON.stringify(storeLineData);
+          localStorage.setItem('content', editor.getValue());
+          localStorage.setItem("storeLineData", localStoreLineData);
+        }, 1000);
+
+      storeToDBInterval = setInterval(
+        function () {
+          storeTestBehaviorData();
+        }, 1000);
+    }
+
+    window.onbeforeunload = function (e) {
+      e = e || window.event;
+
+      // For IE and Firefox prior to version 4
+      if (e) {
+        e.returnValue = 'Sure?';
+      }
+
+      // For Safari
+      return 'Sure?';
+    };
+
+    $(document).ready(function () {
+      window.scrollTo(0, 0);
+
+      if (localStorage.getItem('userid') && localStorage.getItem('q_idx')) {
+        vm.start = true;
+        $("#body").css("overflow-y", "scroll");
+        let temp = localStorage.getItem("q_set");
+        selectedSet = [];
+        selectedSet.push(parseInt(temp[0]));
+        selectedSet.push(parseInt(temp[2]));
+        selectedSet.push(parseInt(temp[4]));
+        toggleQuestion(parseInt(localStorage.getItem('q_idx')));
+        selectLanguage(localStorage.getItem("language"));
+        $("#codingLanguage").text(localStorage.getItem("language"));
+
+        document.querySelector("#language").value = localStorage.getItem("language");
+        if (localStorage.getItem('content')) {
+          editor.setValue(localStorage.getItem('content'));
+        }
+        storeData();
+        getLogfile("refreshweb");
+        console.log("refresh!!");
+      }
+
+      function Validate() {
+        var msg = "",
+          fields = document.getElementById("testerForm").getElementsByTagName("input");
+        for (var i = 0; i < fields.length; i++) {
+          if (fields[i].value == "")
+            msg += fields[i].title + ' can not be null. \n';
+        }
+        if (msg) {
+          alert(msg);
+          return false;
+        }
+        else
+          return true;
+      }
+
+      $('#testerForm').on('submit', function (e) { //開始測試
+        e.preventDefault();
+        if (Validate()) {
+          timestart = new Date().getTime();
+          nowTimestart = timestart;
+          finishTime = timestart + 5400000;
+          localStorage.setItem('timestart', timestart);
+          localStorage.setItem('finishTime', finishTime);
+          // localStorage.setItem("language", "cpp");
+
+          vm.start = !vm.start;
+          $("#body").css("overflow-y", "scroll");
+          localStorage.setItem('userid', vm.userid);
+          getRandomInt(easyQuestion.length); //拿到題組
+          localStorage.setItem('q_idx', 0);
+          toggleQuestion(0);
+          selectLanguage(document.querySelector("#language").value);
+          $("#codingLanguage").text(localStorage.getItem("language"));
+          console.log(localStorage.getItem("language"));
+          var formData = $('#testerForm').serializeArray();
+          formData.push({ name: "question", value: selectedSet });
+          console.log(formData);
+          $.ajax({
+            type: "POST",
+            url: "get-data.php",
+            data: formData,
+            datatype: "html",
+            success: function (result) {
+              console.log(result);
+              if (result.includes("Duplicate")) {
+                endTest(); //如果重複主鍵，則不能進入測試頁面
+                vm.userAge = undefined;
+                vm.userMajor = undefined;
+                alert("Duplicate Id");
+              }
+            }
+          })
+          getLogfile("startTest");
+          storeData();
+        }
+      })
+
+
+
+      $("#inputbox").val(selectQuestion.testCases[0].testCase);
+
+      $("#st").click(function () {
+        //當按下run code button時，output area顯示loading
+        $("#outputBox").html("Loading ......");
+      });
+
+      var mouseCtx = $("#mouseChart");
+      // var q_mouseCtx = $("#q_mouseChart");
+      // var keyCtx = $("#keyboardFeq");
+      // var bsCtx = $("#backspaceTime");
+      // var deCtx = $("#deleteTime");
+      var tabCtx = $("#tabChart");
+
+      //儲存mouse軌跡
+      const mouseData = {
+        datasets: [{
+          label: 'question',
+          data: [],
+          backgroundColor: 'rgba(235, 52, 61, 0.5)',
+          pointRadius: 1,
+        }, {
+          label: 'code',
+          data: [],
+          backgroundColor: 'rgba(52, 94, 235, 0.5)',
+          pointRadius: 1,
+        }, {
+          label: 'input',
+          data: [],
+          backgroundColor: 'rgba(52, 235, 98, 0.5)',
+          pointRadius: 1,
+        }, {
+          label: 'output',
+          data: [],
+          backgroundColor: 'rgba(252, 186, 3, 0.5)',
+          pointRadius: 1,
+        }]
+      };
+      const q_mouseData = {
+        datasets: [{
+          label: 'mouse position(x,y)',
+          data: [],
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          pointRadius: 1,
+        }],
+      };
+
+      mouseChart = new Chart(mouseCtx, {
+        type: "scatter", // 圖表類型
+        data: mouseData,
+        options: {
+          animation: false,
+          scales: {
+            // x: {
+            //   suggestedMin: 0,
+            //   suggestedMax: 1200
+            // },
+            // y: {
+            //   suggestedMin: 0,
+            //   suggestedMax: 1200
+            // }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Mouse Position Scatter Chart'
+            }
+          }
+        }
+      });
+      // q_mouseChart = new Chart(q_mouseCtx, {
+      //   type: "scatter", // 圖表類型
+      //   data: q_mouseData,
+      //   options: {
+      //     scales: {
+      //       x: {
+      //         // suggestedMin: 0,
+      //         // suggestedMax: 1200
+      //       },
+      //       y: {
+      //         // suggestedMin: 0,
+      //         // suggestedMax: 1200
+      //       }
+      //     },
+      //     plugins: {
+      //       title: {
+      //         display: true,
+      //         text: 'Question Mouse Position Scatter Chart'
+      //       }
+      //     }
+      //   }
+      // });
+      // var keyboardChart = new Chart(keyCtx, {
+      //   type: 'bar',
+      //   data: {
+      //     labels: ['Tab', 'Delete', 'Backspace'],
+      //     datasets: [{
+      //       label: 'Keyboard Frequency',
+      //       data: [],
+      //       backgroundColor: [
+      //         'rgba(255, 99, 132, 0.2)',
+      //         'rgba(255, 159, 64, 0.2)',
+      //         'rgba(255, 205, 86, 0.2)']
+      //     }]
+      //   },
+      //   options: {
+      //     y: {
+      //       suggestedMin: 0,
+      //       suggestedMax: 100
+      //     },
+      //     plugins: {
+      //       title: {
+      //         display: true,
+      //         text: 'Keyboard Frequency Bar Chart'
+      //       }
+      //     }
+      //   }
+      // });
+
+      var tabChart = new Chart(tabCtx, {
+        type: 'bar',
+        data: {
+          labels: columnIndex,
+          datasets: [{
+            label: 'tab in per line',
+            data: [],
+            backgroundColor: ['rgba(41, 135, 66, 0.2)']
+          }]
+        },
+        options: {
+          animation: false,
+          scales: {
+            y: {
+              suggestedMin: 0,
+              suggestedMax: 10
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Tab Bar Chart'
+            }
+          }
+        }
+      });
+
+      var offset = $(".CodeMirror-scroll").offset();
+      var q_offset = $(".question").offset();
+      var one = 0; //控制時間
+      var dt;
+      var waittime = 0;
+      var mouseCap = 0;
+      var q_mouseCap = 0;
+      var mousePositionData0 = { "question": [], "input": [], "output": [], "code": [] };
+      var mousePositionData1 = { "question": [], "input": [], "output": [], "code": [] };
+      var mousePositionData2 = { "question": [], "input": [], "output": [], "code": [] };
+
+      $(".question").mousemove(
+        function (e) {
+          questionPosTop = e.pageY - parseInt(q_offset.top);
+          questionPosLeft = e.pageX - q_offset.left;
+          // vm.pageX = questionPosTop;
+          // vm.pageY = questionPosLeft;
+          if (q_mouseCap % 10 == 0) { //調整捕捉mouse的頻率
+            q_mouseData.datasets[0].data.push({ x: questionPosTop, y: questionPosLeft });
+            q_mouseCap = 0;
+          }
+          q_mouseCap += 1;
+        }
+      )
+      $(window).mousemove(
+        function (e) {
+          cursorPosTop = e.pageY - parseInt(offset.top);
+          cursorPosLeft = e.pageX - offset.left;
+          if (mouseCap % 10 == 0) { //調整捕捉mouse的頻率
+            // console.log(mouseData);
+            if (questionArea) {
+              if (parseInt(localStorage.getItem('q_idx')) == 0) {
+                mousePositionData0.question.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else if (parseInt(localStorage.getItem('q_idx')) == 1) {
+                mousePositionData1.question.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
+                mousePositionData2.question.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              // mouseData.datasets[0].data.push({ x: cursorPosTop, y: cursorPosLeft });
+              mouseInCodeplace = false;
+              mouseCap = 0;
+            }
+            else if (inputArea) {
+              if (parseInt(localStorage.getItem('q_idx')) == 0) {
+                mousePositionData0.input.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else if (parseInt(localStorage.getItem('q_idx')) == 1) {
+                mousePositionData1.input.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
+                mousePositionData2.input.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              // mouseData.datasets[2].data.push({ x: cursorPosTop, y: cursorPosLeft });
+              mouseInCodeplace = false;
+              mouseCap = 0;
+            }
+            else if (outputArea) {
+              if (parseInt(localStorage.getItem('q_idx')) == 0) {
+                mousePositionData0.output.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else if (parseInt(localStorage.getItem('q_idx')) == 1) {
+                mousePositionData1.output.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
+                mousePositionData2.output.push({ x: cursorPosTop, y: cursorPosLeft });
+              }
+              // mouseData.datasets[3].data.push({ x: cursorPosTop, y: cursorPosLeft });
+              mouseInCodeplace = false;
+              mouseCap = 0;
+            }
+            // if(mouseInCodeplace = false){ //else area & code area //找出codearea mouseleave事件，stop interval
+
+            //   // mouseCap = 0;
+            // }
+          }
+          mouseCap += 1;
+        }
+      )
+      var mouseInCodeplace = false;
+      $(".CodeMirror-scroll").mousemove(
+        function (e) {
+          mouseInCodeplace = false;
+          cursorPosTop = e.pageY - parseInt(offset.top);
+          cursorPosLeft = e.pageX - offset.left;
+          if (mouseCap % 10 == 0) {
+            if (parseInt(localStorage.getItem('q_idx')) == 0) {
+              mousePositionData0.code.push({ x: cursorPosTop, y: cursorPosLeft });
+            }
+            else if (parseInt(localStorage.getItem('q_idx')) == 1) {
+              mousePositionData1.code.push({ x: cursorPosTop, y: cursorPosLeft });
+            }
+            else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
+              mousePositionData2.code.push({ x: cursorPosTop, y: cursorPosLeft });
+            }
+            // mouseData.datasets[1].data.push({ x: cursorPosTop, y: cursorPosLeft });
+            mouseCap = 0;
+          }
+          mouseCap += 1;
+        }
+      )
+
+      var inputArea;
+      $(".inputMouse").on({
+        mousemove: function () {
+          inputArea = true;
+        },
+        mouseleave: function () {
+          inputArea = false;
+        }
+      })
+      var outputArea;
+      $(".outputMouse").on({
+        mousemove: function () {
+          outputArea = true;
+        },
+        mouseleave: function () {
+          outputArea = false;
+        }
+      })
+      var questionArea;
+      $(".question").on({
+        mouseenter: function () {
+          questionArea = true;
+        },
+        mouseleave: function () {
+          questionArea = false;
+        }
+      })
+
+      updateChartFun = function updataChart() {
+        // q_mouseChart.data = q_mouseData;
+        // keyboardChart.data.datasets[0].data[0] = vm.tabTime;
+        // keyboardChart.data.datasets[0].data[1] = vm.deleteTime;
+        // keyboardChart.data.datasets[0].data[2] = vm.backspaceTime;
+        if (parseInt(localStorage.getItem('q_idx')) == 0) {
+          mouseData.datasets[0].data = mousePositionData0.question;
+          mouseData.datasets[1].data = mousePositionData0.code;
+          mouseData.datasets[2].data = mousePositionData0.input;
+          mouseData.datasets[3].data = mousePositionData0.output;
+        }
+        else if (parseInt(localStorage.getItem('q_idx')) == 1) {
+          mouseData.datasets[0].data = mousePositionData1.question;
+          mouseData.datasets[1].data = mousePositionData1.code;
+          mouseData.datasets[2].data = mousePositionData1.input;
+          mouseData.datasets[3].data = mousePositionData1.output;
+        }
+        else { // (parseInt(localStorage.getItem('q_idx')) == 2)
+          mouseData.datasets[0].data = mousePositionData2.question;
+          mouseData.datasets[1].data = mousePositionData2.code;
+          mouseData.datasets[2].data = mousePositionData2.input;
+          mouseData.datasets[3].data = mousePositionData2.output;
+        }
+        // console.log(mousePositionData0);
+        // console.log(mousePositionData1);
+        // console.log(mousePositionData2);
+        // console.log(mouseData.datasets);
+        mouseChart.data = mouseData;
+        countTabPerLine();
+        tabChart.data.labels = columnIndex;
+        tabChart.data.datasets[0].data = tabTimePerLine;
+
+        mouseChart.update();
+        // q_mouseChart.update();
+        // keyboardChart.update();
+        tabChart.update();
+      }
+
+      // endChartFun = function endChart() {
+      //   mouseData.datasets[0].data = [];
+      //   mouseData.datasets[1].data = [];
+      //   mouseData.datasets[2].data = [];
+      //   mouseData.datasets[3].data = [];
+      // }
+
+      // $("#chartbtn").click(
+      //   function () {
+      //     mouseChart.data = mouseData;
+      //     // q_mouseChart.data = q_mouseData;
+      //     // bsChart.data.datasets[0].data = backspaceTimePerLine;
+      //     // deChart.data.datasets[0].data = deleteTimePerLine;
+      //     // keyboardChart.data.datasets[0].data[0] = vm.tabTime;
+      //     // keyboardChart.data.datasets[0].data[1] = vm.deleteTime;
+      //     // keyboardChart.data.datasets[0].data[2] = vm.backspaceTime;
+      //     countTabPerLine();
+      //     tabChart.data.labels = columnIndex;
+      //     tabChart.data.datasets[0].data = tabTimePerLine;
+
+      //     mouseChart.update();
+      //     // q_mouseChart.update();
+      //     // keyboardChart.update();
+      //     tabChart.update();
+
+      //     // bsChart.update();
+      //     // deChart.update();
+      //   }
+      // )
+    });
+
+    //記錄下互動行為
+    var vm = new Vue({
+      el: "#app",
+      data: {
+        keyboard_press: [
+          { key: "A", num: 65, click: 0 }, { key: "B", num: 66, click: 0 }, { key: "C", num: 67, click: 0 }, { key: "D", num: 68, click: 0 }, { key: "E", num: 69, click: 0 }, { key: "F", num: 70, click: 0 }, { key: "G", num: 71, click: 0 }, { key: "H", num: 72, click: 0 }, { key: "I", num: 73, click: 0 }, { key: "J", num: 74, click: 0 }, { key: "K", num: 75, click: 0 }, { key: "L", num: 76, click: 0 }, { key: "M", num: 77, click: 0 }, { key: "N", num: 78, click: 0 }, { key: "O", num: 79, click: 0 }, { key: "P", num: 80, click: 0 }, { key: "Q", num: 81, click: 0 }, { key: "R", num: 82, click: 0 }, { key: "S", num: 83, click: 0 }, { key: "T", num: 84, click: 0 }, { key: "U", num: 85, click: 0 }, { key: "V", num: 86, click: 0 }, { key: "W", num: 87, click: 0 }, { key: "X", num: 88, click: 0 }, { key: "Y", num: 89, click: 0 }, { key: "Z", num: 90, click: 0 }, { key: "{", num: 123, click: 0 }, { key: "}", num: 125, click: 0 }, { key: "(", num: 40, click: 0 }, { key: ")", num: 41, click: 0 }, { key: "[", num: 91, click: 0 }, { key: "]", num: 93, click: 0 }, { key: "0", num: 48, click: 0 }, { key: "1", num: 49, click: 0 }, { key: "2", num: 50, click: 0 }, { key: "3", num: 51, click: 0 }, { key: "4", num: 52, click: 0 }, { key: "5", num: 53, click: 0 }, { key: "6", num: 54, click: 0 }, { key: "7", num: 55, click: 0 }, { key: "8", num: 56, click: 0 }, { key: "9", num: 57, click: 0 }, { key: "=", num: 61, click: 0 }, { key: " ", num: 32, click: 0 },
+          { key: "a", num: 97, click: 0 }, { key: "b", num: 98, click: 0 }, { key: "c", num: 99, click: 0 }, { key: "d", num: 100, click: 0 }, { key: "e", num: 101, click: 0 }, { key: "f", num: 102, click: 0 }, { key: "g", num: 103, click: 0 }, { key: "h", num: 104, click: 0 }, { key: "i", num: 105, click: 0 }, { key: "j", num: 106, click: 0 }, { key: "k", num: 107, click: 0 }, { key: "l", num: 108, click: 0 }, { key: "m", num: 109, click: 0 }, { key: "n", num: 110, click: 0 }, { key: "o", num: 111, click: 0 }, { key: "p", num: 112, click: 0 }, { key: "q", num: 113, click: 0 }, { key: "r", num: 114, click: 0 }, { key: "s", num: 115, click: 0 }, { key: "t", num: 116, click: 0 }, { key: "u", num: 117, click: 0 }, { key: "v", num: 118, click: 0 }, { key: "w", num: 119, click: 0 }, { key: "x", num: 120, click: 0 }, { key: "y", num: 121, click: 0 }, { key: "z", num: 122, click: 0 }],
+        codes: [],
+        start: false,
+        userid: makeid(),
+        userAge: undefined,
+        userMajor: undefined,
+        questionNum: 0,
+        selectQuestionIndex: 0,
+        selectQuestion: easyQuestion[nowQuestionIndex],
+        expectOutput: easyQuestion[nowQuestionIndex].testCases[0].ans,
+        open_record: false,
+        submit: true,
+        run_code: 0,
+        commitTime: 0,
+        backspaceTime: 0,
+        deleteTime: 0,
+        tabTime: 0,
+        textLength: codebox.value.length,
+        currentLineNumber: undefined, //判斷目前在第幾行
+        currentColumnIndex: undefined, ////判斷目前行數的index
+        pageX: undefined,
+        pageY: undefined,
+        copy: 0,
+        cut: 0,
+        paste: 0,
+        undo: 0,
+        redo: 0,
+
+        passTime: 0,
+        // columnIndex: [],
+        codingMaxIndex: undefined,
+        successResult: [],
+        errorResult: [],
+        resulttemp: [],
+        copyText: [],
+        cutText: [],
+        pasteText: [],
+        storeLineData: []
+      },
+      methods: {
+        addcode: function (a) {
+          this.codes.push(a);
+        },
+        backspace: function () {
+          this.codes.pop();
+        }
+      }
+    });
+
+    function openDetail(area) {
+      if (area === 0) { //open record
+        vm.open_record = !vm.open_record;
+
+      }
+    }
+    // var q_submit = Array(3).fill(0);
+    function windowPopUp() {
+      let submitResult = confirm('Submit your code?');
+      if (submitResult) {
+        updateChartFun();
+        // q_submit[parseInt(localStorage.getItem('q_idx'))] = 1;
+        // localStorage.setItem('q_submit', q_submit);
+        localStoreLineData = JSON.stringify(storeLineData);
+        localStorage.setItem('content', editor.getValue());
+        localStorage.setItem("storeLineData", localStoreLineData);
+        storeTestBehaviorData();
+        storeSubmitData();
+        vm.questionNum = (vm.questionNum + 1) % 3;
+        console.log("web q_index", vm.questionNum);
+        action = undefined;
+        codeChange = false;
+        getLogfile("submit");
+        toggleQuestion(vm.questionNum);
+        // storeLineData = [];
+        // vm.codingMaxIndex = editor.getValue().split("\n").length;
+        // for (var i = 0; i < vm.codingMaxIndex; i++) {
+        //   storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
+        // }
+        vm.storeLineData = storeLineData;
+
+        window.scrollTo(0, 0);
+        // endChartFun();
+        // console.log(q_submit);
+        // let q_submit_bool = true;
+        // q_submit.forEach(function (item) {
+        //   if (item == 0) {
+        //     q_submit_bool = false;
+        //   }
+        // });
+
+        // if (q_submit_bool) {
+        //   let submitResultFinal = confirm('You are already finish all the test, do you want to end the test?');
+        //   if (submitResultFinal) {
+        //     updateChartFun();
+        //     localStoreLineData = JSON.stringify(storeLineData);
+        //     localStorage.setItem('content', editor.getValue());
+        //     localStorage.setItem("storeLineData", localStoreLineData);
+        //     storeTestBehaviorData();
+        //     storeSubmitData();
+        //     // endChartFun();
+        //     //結束測試
+        //     endTest();
+        //   }
+        // }
+      } else {
+        console.log("cancel!!");
+      }
+    }
+    function endTestBtn() {
+      let submitResultFinal = confirm('Do you want to end the test?');
+      if (submitResultFinal) {
+        updateChartFun();
+        localStoreLineData = JSON.stringify(storeLineData);
+        localStorage.setItem('content', editor.getValue());
+        localStorage.setItem("storeLineData", localStoreLineData);
+        storeTestBehaviorData();
+        storeSubmitData();
+        // endChartFun();
+        //結束測試
+        endTest();
+      }
+    }
+
+    function endTest() {
+      getLogfile("endTest");
+      clearInterval(timeInterval);
+      clearInterval(storeInterval);
+      clearInterval(storeToDBInterval);
+      localStorage.clear();
+      window.scrollTo(0, 0);
+      $("#body").css("overflow-y", "hidden");
+
+      vm.start = false;
+    }
+
+    //選擇的程式語言
+    function selectLanguage(list) {
+      // let languageConfirm = confirm('If you change the language, the original code will lost. Are you sure to change it?');
+      // if (languageConfirm) {
+      localStorage.setItem("language", list);
+      switch (list) {
+        case 'c++':
+          this.editor.setOption("mode", 'text/x-c++src');
+          editor.setValue('#include<iostream>\n#include<vector>\nusing namespace std;\n\n' + selectQuestion.cppCodeText1 + '\nint main() {\n' + selectQuestion.cppCodeText2 + '\n}');
+          break;
+        case 'c':
+          this.editor.setOption("mode", 'text/x-csrc');
+          editor.setValue('#include <stdio.h>\n\n' + selectQuestion.cCodeText1 + '\nint main() {\n' + selectQuestion.cCodeText2 + '\n}');
+          break;
+        case 'Java':
+          this.editor.setOption("mode", 'text/x-java');
+          editor.setValue('import java.util.*;\nimport java.lang.*;\nimport java.io.*;\n\nclass Solution {\n\tpublic static void main(String[] args) {\n\t\tScanner in = new Scanner(System.in);\n\t\t' + vm.selectQuestion.javaCodeText + '\n}');
+          break;
+        case 'Python':
+          this.editor.setOption("mode", 'text/x-python');
+          editor.setValue(selectQuestion.pythonText);
+          break;
+      }
+      storeLineData = [];
+      vm.codingMaxIndex = editor.getValue().split("\n").length;
+      for (var i = 0; i < vm.codingMaxIndex; i++) {
+        storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
+      }
+      vm.storeLineData = storeLineData;
+      // }
+      // else {
+      //   document.querySelector("#language").value = localStorage.getItem("language");
+      // }
+    }
+
+    var testCaseIndex = 0;
+    function selectTest(index) {
+      testCaseIndex = index;
+      let testCases = selectQuestion.testCases;
+      if (testCaseIndex < 3) {
+        $("#inputbox").attr("readonly", true);
+        $("#inputbox").val(testCases[testCaseIndex].testCase);
+        vm.expectOutput = testCases[testCaseIndex].ans;
+      }
+      else {
+        $("#inputbox").attr("readonly", false);
+        $("#inputbox").val("");
+        vm.expectOutput = undefined;
+      }
+    }
+
+    function toggleQuestion(questionNum) { //換題目
+      if (codeChange) { //code尚未繳交過
+        let submitConfirm = confirm('You have not submitted the program, are you sure to change the question? (Your code will be lost)');
+        if (submitConfirm) {
+          setToggleQContent(questionNum);
+        }
+      }
+      else { //code已繳交
+        setToggleQContent(questionNum);
+      }
+    }
+
+    function setToggleQContent(questionNum) {
+      nowTimestart = new Date().getTime();
+      // clearInterval(lt);
+      if (questionNum != parseInt(localStorage.getItem('q_idx'))) { //表示換題
+        localStorage.removeItem('content');
+        // console.log("change question");
+      }
+
+      vm.questionNum = questionNum; //網頁的第幾題
+      nowQuestionIndex = selectedSet[questionNum]; //題組的index
+      selectQuestion = easyQuestion[nowQuestionIndex]; //該index的題目內容
+
+      vm.selectQuestion = selectQuestion;
+      vm.selectQuestionIndex = nowQuestionIndex
+      localStorage.setItem('q_idx', questionNum);
+      getLogfile("toggleQuestion");
+
+      let dbdata = {
+        "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+        "q_Idx": nowQuestionIndex,
+        "language": localStorage.getItem("language")
+      }
+
+      let postbody = JSON.stringify(dbdata);
+
+      $.ajax({
+        url: "get-content.php",
+        type: "POST",
+        data: postbody,
+        async: false,
+        success: function (result) {
+          if (result != "") {
+            // console.log(result);
+            result = JSON.parse(result);
+            tempTime = result[0];
+            let text = result[1];
+            editor.setValue(text);
+            // console.log(storeLineData);
+          }
+          else {
+            if (localStorage.getItem("language") == 'Java') {
+              editor.setValue('import java.util.*;\nimport java.lang.*;\nimport java.io.*;\n\nclass Solution {\n\tpublic static void main(String[] args) {\n\t\tScanner in = new Scanner(System.in);\n\t\t' + selectQuestion.javaCodeText + '\n}');
+            }
+            else if (localStorage.getItem("language") == 'c++') {
+              editor.setValue('#include<iostream>\n#include<vector>\nusing namespace std;\n\n' + selectQuestion.cppCodeText1 + '\nint main() {\n' + selectQuestion.cppCodeText2 + '\n}');
+            }
+            else if (localStorage.getItem("language") == 'c') {
+              editor.setValue('#include <stdio.h>\n\n' + selectQuestion.cCodeText1 + '\nint main() {\n' + selectQuestion.cCodeText2 + '\n}');
+            }
+            else if (localStorage.getItem("language") == 'Python') {
+              editor.setValue(selectQuestion.pythonText);
+            }
+          }
+        }
+      });
+      setStoreLineData();
+      selectTest(testCaseIndex);
+    }
+
+    function getLogfile(action) {
+      let dbdata = {
+        "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+        "q_Idx": nowQuestionIndex,
+        "q_num": localStorage.getItem("q_idx"),
+        "action": action
+      }
+
+      let jsonDataToSend = JSON.stringify(dbdata);
+      $.ajax({
+        type: "POST",
+        url: "get-logfile.php",
+        data: jsonDataToSend,
+        success: function (result) {
+          // console.log(result);
+        },
+        error: function () {
+          console.log("test content js fail");
+        }
+      })
+    }
+
+    function setStoreLineData() {
+
+      let dbdata = {
+        "u_Idx": resultPreprocess(localStorage.getItem("userid")),
+        "q_Idx": nowQuestionIndex,
+        "language": localStorage.getItem("language")
+      }
+
+      let postbody = JSON.stringify(dbdata);
+
+      $.ajax({
+        url: "get-behavior.php",
+        type: "POST",
+        data: postbody,
+        async: false,
+        success: function (result) {
+          // console.log(result)
+          if (result != "") {
+            // console.log("learndata exist")
+            result = JSON.parse(result);
+            // console.log(result);
+            storeLineData = [];
+            for (var i = 0; i < result.length; i++) {
+              // console.log(result[i].time);
+              storeLineData.push({ 'time': parseInt(result[i].time), 'backspace': parseInt(result[i].backspaceTime), 'delete': parseInt(result[i].deleteTime), 'copy': parseInt(result[i].copy), 'cut': parseInt(result[i].cut), 'paste': parseInt(result[i].paste), 'undo': parseInt(result[i].undoTime), 'redo': parseInt(result[i].redoTime) })
+            }
+            vm.storeLineData = storeLineData
+            // console.log(storeLineData);
+            submitfirst = 1;
+          }
+          else {
+            // console.log("learndata null");
+            // storeLineData = [];
+            // vm.codingMaxIndex = editor.getValue().split("\n").length;
+            // for (var i = 0; i < vm.codingMaxIndex; i++) {
+            //   storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
+            // }
+          }
+        }
+      })
+    }
+
+    $(".refresh").click(
+      function () {
+        let codeRefresh = confirm('Your code will be discarded and reset to the default code!');
+        if (codeRefresh) {
+          selectLanguage(localStorage.getItem('language'));
+          getLogfile("refreshBtn");
+        }
+      }
+    )
+
+
+    var nowKeydownNum = undefined;
+
+    var textValue = [];
+    var nowLineText = "";
+    var nowLine = -1;
+    var removeText = "";
+
+    function toggleLine(lineAction, deviation) {
+      removeTextSpace(nowLineText);
+      if (lineAction == 'add') { //新增一行
+        // countLineNum(removeText, "add");
+        if (numOfSpace >= vm.currentColumnIndex) {//在text前新增一行
+          for (var i = 0; i < deviation; i++) {
+            storeLineData.splice(vm.currentLineNumber - 1, 0, { 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 });
+          }
+        }
+        else { //在text後新增一行
+          for (var i = 0; i < deviation; i++) {
+            storeLineData.splice(vm.currentLineNumber, 0, { 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 });
+          }
+        }
+      }
+      else if (lineAction == 'remove') { //移除一行
+        // countLineNum(removeText, "remove");
+        if (nowKeydownNum == 8) { //backspace
+          storeLineData.splice(selectBefore, deviation);
+        }
+        else if (nowKeydownNum == 46) { //delete ------problem!!
+          storeLineData.splice(vm.currentLineNumber, 1);
+        }
+        else {
+          storeLineData.splice(selectBefore, deviation);
+        }
+      }
+      vm.storeLineData = storeLineData;
+    }
+    var numOfSpace;
+
+    function removeTextSpace(nowLineText) {
+      const pttrn = /^\s*/; //\s matches any white space character [\r\n\t\f]
+      numOfSpace = nowLineText.match(pttrn)[0].length; //回傳text前共有幾個空格
+    }
+    function convertSecondsToHhMmSs(milliseconds) {
+      let second = milliseconds / 1000;
+      let s = Math.floor(second % 60);
+      let m = Math.floor((second / 60) % 60);
+      let h = Math.floor((second / (60 * 60)) % 24);
+      if (h < 10) { h = "0" + h; }
+      if (m < 10) { m = "0" + m; }
+      if (s < 10) { s = "0" + s; }
+      return (h + ":" + m + ":" + s);
+    }
+    function convertHhMmSsToSeconds(hhmmss) {
+      let timeArray = hhmmss.split(':');
+      // console.log(timeArray);
+      let hour = parseInt(timeArray[0]);
+      let min = parseInt(timeArray[1]);
+      let sec = parseInt(timeArray[2]);
+      // console.log(hour * 3600 + min * 60 + sec);
+      return hour * 3600 + min * 60 + sec;
+    }
+
+    function addTimes(startTime, endTime) {
+      var times = [0, 0, 0]
+      var max = times.length
+      var a = (startTime || '').split(':')
+      var b = (endTime || '').split(':')
+      // normalize time values
+      for (var i = 0; i < max; i++) {
+        a[i] = isNaN(parseInt(a[i])) ? 0 : parseInt(a[i])
+        b[i] = isNaN(parseInt(b[i])) ? 0 : parseInt(b[i])
+      }
+      // store time values
+      for (var i = 0; i < max; i++) {
+        times[i] = a[i] + b[i]
+      }
+      var hours = times[0]
+      var minutes = times[1]
+      var seconds = times[2]
+      if (seconds >= 60) {
+        var m = (seconds / 60) << 0
+        minutes += m
+        seconds -= 60 * m
+      }
+      if (minutes >= 60) {
+        var h = (minutes / 60) << 0
+        hours += h
+        minutes -= 60 * h
+      }
+      return ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2)
+    }
+
+    var columnIndex = [];
+    var wordNumber;
+    function countTabPerLine() {
+      columnIndex = [];
+      tabTimePerLine = Array(textValue.length).fill(0);
+      wordNumber = 0;
+      for (var i = 0; i < textValue.length; i++) {
+        if (textValue[i] != undefined) {
+          columnIndex.push(i + 1);
+          removeTextSpace(textValue[i]);
+          for (var j = 0; j < textValue[i].length; j++) {
+            if (textValue[i].charAt(j) != '') {
+              wordNumber++;
+            }
+          }
+          tabTimePerLine[i] = numOfSpace;
+        }
+      }
+    }
+
+    var lt;
+    var storetime;
+    var timeControl = 0;
+
+    function startTimer(time) {
+      if (timeControl == 1) { //close forward interval
+        stopTimer();
+      }
+      lt = setInterval(
+        function () {
+          // storetime += 1;
+          storeLineData[vm.currentLineNumber - 1].time += 1;
+          vm.storeLineData = storeLineData;
+        }, 1000);
+      timeControl = 1;
+    }
+    function stopTimer() {
+      timeControl = 0;
+      clearInterval(lt);
+    }
+
+    //用codemirror instance替換原本的textarea，也會將原本編輯器的鄭文同步給textarea，確保提交form時textarea會包含正文
+    var editor = CodeMirror.fromTextArea(document.getElementById('codebox'), {
+      mode: "text/x-c++src",
+      lineNumbers: true,
+      autoRefresh: true,
+      indentWithTabs: true,
+      smartIndent: true,
+      indentUnit: 4,
+      lineWrapping: true,
+      showCursorWhenSelecting: true,
+      dragDrop: false, //文字拖動功能
+      autoCloseBrackets: true, //補全(){}""...
+      matchBrackets: true
+      // lint: true,
+    });
+    editor.setValue('#include<iostream>\n#include<vector>\n#include<vector>using namespace std;\n\n' + selectQuestion.cppCodeText1 + '\nint main() {\n' + selectQuestion.cppCodeText2 + '\n}');
+    editor.setSize("100%", "400px"); //調整高度
+    editor.save(); //copy正文到textarea
+
+    editor.setOption("extraKeys", { //額外設定快捷鍵
+      'Ctrl-/': function (cm) {
+        storeTestContentData("comment", textValue[cursor.line]); // 若文字前"沒有"//表示被註解的句子，"有"則是解除註解的句子!!
+        cm.toggleComment();
+      },
+      'Cmd-/': function (cm) {
+        storeTestContentData("comment", textValue[cursor.line]); // 若文字前"沒有"//表示被註解的句子，"有"則是解除註解的句子!!
+        cm.toggleComment();
+      }
+    });
+
+    var selectBefore;
+    var selectAfter;
+    var codeChange = false;
+    editor.on("keydown", function (cm, e) {
+      // console.log(textValue);
+      // console.log(e);
+      if (!codeChange) {
+        getLogfile("firstKeyDown");
+      }
+      codeChange = true;
+      // console.log("codeChange:", codeChange);
+      selectBefore = editor.getCursor(true).line;
+      selectAfter = editor.getCursor(false).line;
+      action = 'key';
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.keyCode) {
+          case 90: //ctrl + z
+            storeLineData[cursor.line].undo += 1;
+            vm.undo += 1;
+            break;
+          case 89: //ctrl + y
+            storeLineData[cursor.line].redo += 1;
+            vm.redo += 1;
+            break;
+        }
+      }
+      else { //e.ctrlKey == false，才不會儲存到功能快捷鍵的key值
+        var press = e.key;
+        nowKeydownNum = e.keyCode;
+        // console.log(nowKeydownNum);
+        for (var i = 0; i < vm.keyboard_press.length; i++) {
+          if (press == vm.keyboard_press[i].key) {
+            vm.keyboard_press[i].click++;
+            vm.addcode(vm.keyboard_press[i].key);
+          }
+        }
+      }
+      if (e.keyCode === 9) {
+        vm.tabTime += 1;
+      }
+      detectKeyNumTime();
+    });
+
+    var storeText; //儲存editor.getSelection()的文字
+    function detectKeyNumTime() {
+      if (nowKeydownNum == 8) {
+        // vm.backspace(); //Backspace鍵  -------need?????????
+        vm.backspaceTime += 1;
+      }
+      if (nowKeydownNum == 46) { //Delete鍵
+        vm.deleteTime += 1;
+      }
+      keyboardTimePerLine(vm.currentLineNumber, nowKeydownNum);
+    }
+    function keyboardTimePerLine(line, nowKeydownNum) {
+      switch (nowKeydownNum) {
+        case 8:
+          storeLineData[line - 1].backspace += 1;
+          break;
+        case 46:
+          storeLineData[line - 1].delete += 1;
+          break;
+        // case 9:
+        //   tabTimePerLine[line - 1] += 1;
+        //   break;
+      }
+    }
+
+    var action = undefined;
+    editor.on("mousedown", function (cm, e) {
+      removeText = editor.getSelection();
+      selectBefore = editor.getCursor(true).line;
+      selectAfter = editor.getCursor(false).line;
+      action = 'mouse';
+    });
+    var cursor;
+    var lineStartTime
+    var submitfirst = 1;
+    editor.on("cursorActivity", function (cm, e) {
+      cursor = cm.getCursor();
+      // console.log(cursor)
+      textValue = editor.getValue().split("\n"); //儲存每一行的text，array形式
+      const deviation = Math.abs(textValue.length - vm.codingMaxIndex); //增加or減少幾行
+      if (vm.codingMaxIndex < textValue.length) { //表示增加行數
+        toggleLine('add', deviation);
+      }
+      else if (vm.codingMaxIndex > textValue.length) { //表示減少行數
+        toggleLine('remove', deviation);
+      }
+      nowLineText = textValue[cursor.line]; //目前所在行數的text
+
+      // if (cursor.sticky == null) { //切換題目後停止interval
+      //   clearInterval(lt);
+      // }
+      // else {
+      if (action == 'key' && (cursor.line + 1) != vm.currentLineNumber) { //用key切換行時才須開始計時
+        startTimer(storeLineData[cursor.line].time)
+      }
+      vm.currentLineNumber = cursor.line + 1;
+      if (action == 'mouse') {
+        startTimer(storeLineData[cursor.line].time);
+      }
+      // }
+      nowLine = vm.currentLineNumber;
+      vm.currentColumnIndex = cursor.ch;
+      vm.codingMaxIndex = textValue.length; //儲存文字最大行數
+    })
+
+    editor.on("copy", function (cm, e) {
+      vm.copyText.push({
+        "text": editor.getSelection(),
+        "line": cursor.line
+      });
+      storeTestContentData("copy", editor.getSelection());
+      storeLineData[cursor.line].copy += 1;
+      vm.copy += 1;
+    })
+    editor.on("cut", function (cm, e) {
+      vm.cutText.push({
+        "text": editor.getSelection(),
+        "line": cursor.line
+      });
+      storeTestContentData("cut", editor.getSelection());
+      storeLineData[cursor.line].cut += 1;
+      vm.cut += 1;
+    })
+    editor.on("paste", function (cm, e) {
+      vm.pasteText.push({
+        "text": e.clipboardData.getData('text/plain'),
+        "line": cursor.line
+      });
+      storeTestContentData("paste", e.clipboardData.getData('text/plain'));
+      storeLineData[cursor.line].paste += 1;
+      vm.paste += 1;
+    })
+
+    function resultPreprocess(result) { //SQL不能存有'的文字,,<<
+      if (result != undefined) {
+        return result.replaceAll("'", "''");
+      }
+      else
+        return result;
+    }
+
+
+    function update(text) {
+      let result_element = document.querySelector("#highlighting-content");
+      // Update code
+      result_element.innerText = text;
+      // Syntax Highlight
+      Prism.highlightElement(result_element);
+    }
+  </script>
+
+  <script src="prism.js"></script>
+  <style>
+    #editing, #highlighting {
+  /* Both elements need the same text and space styling so they are directly on top of each other */
+  margin: 10px;
+  padding: 10px;
+  border: 0;
+  width: calc(100% - 32px);
+  height: 150px;
+}
+#editing, #highlighting, #highlighting * {
+  /* Also add text styles to highlighing tokens */
+  font-size: 15pt;
+  font-family: monospace;
+  line-height: 20pt;
+  tab-size: 2;
+}
+
+
+#editing, #highlighting {
+  /* In the same place */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+/* Move the textarea in front of the result */
+
+#editing {
+  z-index: 1;
+}
+#highlighting {
+  z-index: 0;
+}
+
+
+/* Make textarea almost completely transparent */
+
+#editing {
+  color: transparent;
+  background: transparent;
+  caret-color: white; /* Or choose your favourite color */
+}
+
+/* Can be scrolled */
+#editing, #highlighting {
+  overflow: auto;
+  white-space: nowrap; /* Allows textarea to scroll horizontally */
+}
+
+/* No resize on textarea */
+#editing {
+  resize: none;
+}
+
+/* Paragraphs; First Image */
+* {
+  font-family: "Fira Code", monospace;
+}
+/* p code {
+  border-radius: 2px;
+  background-color: #eee;
+  color: #111;
+} */
+
+
+/* Syntax Highlighting from prism.js starts below, partly modified: */
+
+/* PrismJS 1.23.0
+https://prismjs.com/download.html#themes=prism-funky&languages=markup */
+/**
+ * prism.js Funky theme
+ * Based on “Polyfilling the gaps” talk slides http://lea.verou.me/polyfilling-the-gaps/
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: .4em .8em;
+	margin: .5em 0;
+	overflow: auto;
+	/* background: url('data:image/svg+xml;charset=utf-8,<svg%20version%3D"1.1"%20xmlns%3D"http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg"%20width%3D"100"%20height%3D"100"%20fill%3D"rgba(0%2C0%2C0%2C.2)">%0D%0A<polygon%20points%3D"0%2C50%2050%2C0%200%2C0"%20%2F>%0D%0A<polygon%20points%3D"0%2C100%2050%2C100%20100%2C50%20100%2C0"%20%2F>%0D%0A<%2Fsvg>');
+	background-size: 1em 1em; - WebCoder49*/
+  background: black; /* - WebCoder49 */
+}
+
+code[class*="language-"] {
+	background: black;
+	color: white;
+	box-shadow: -.3em 0 0 .3em black, .3em 0 0 .3em black;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .2em;
+	border-radius: .3em;
+	box-shadow: none;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #aaa;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+	color: #0cf;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+	color: yellow;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.token.variable,
+.token.inserted {
+	color: yellowgreen;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: deeppink;
+}
+
+.token.regex,
+.token.important {
+	color: orange;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+
+.token.deleted {
+	color: red;
+}
+
+/* Plugin styles: Diff Highlight */
+pre.diff-highlight.diff-highlight > code .token.deleted:not(.prefix),
+pre > code.diff-highlight.diff-highlight .token.deleted:not(.prefix) {
+	background-color: rgba(255, 0, 0, .3);
+	display: inline;
+}
+
+pre.diff-highlight.diff-highlight > code .token.inserted:not(.prefix),
+pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
+	background-color: rgba(0, 255, 128, .3);
+	display: inline;
+}
+
+/* End of prism.js syntax highlighting*/
+  </style>
+
+
+  <script>
+    //按下Run Code的action
+    //wait for page load to initialize script
+    $(document).ready(function () {
+      //listen for form submission
+      $('#form').on('submit', function (e) {
+        //prevent form from submitting and leaving page
+        //如果事件可以被取消，就取消事件（即取消事件的預設行為）。但不會影響事件的傳遞，事件仍會繼續傳遞。
+        getLogfile("runCode");
+        var formData = $('#form').serializeArray();
+        formData.push({ name: "language", value: localStorage.getItem("language") });
+        // console.log(formData);
+        e.preventDefault();
+        // AJAX 
+        $.ajax({
+          type: "POST", //type of submit
+          cache: false,
+          //important or else you might get wrong data returned to you
+          //預設為true，設定為false將不會從瀏覽器cache中載入請求資訊。
+          url: "compile.php",
+          //destination
+          //預設為GET
+          datatype: "html",
+          //expected data format from process.php
+          data: formData, //target your form's data and serialize for a POST
+          success: function (result) { // data is the var which holds the output of your process.php
+            // locate the div with #result and fill it with returned data from process.php
+            //result: compiler 完的 output
+            //顯示出output area的結果
+
+            vm.resulttemp.push(result);
+            result = result.substring(4);
+            // console.log(result.charAt(5));
+            $('#outputBox').html(result);
+            switch (result.charAt(5)) {
+              case "S":
+                // console.log(result);
+                // result = result.substring(21);//去除result前的\r\n
+                storeTestContentData("success", result);
+                vm.successResult.push(result);
+                break;
+              case "E":
+                // result = result.substring(32);//去除result前的\r\n
+                // console.log(result);
+                storeTestContentData("wrong", result);
+                vm.errorResult.push(result);
+                break;
+            }
+            vm.run_code = vm.run_code + 1;
+          }
+        });
+      });
+
+
+
+    });
+
+
+  </script>
+
+</body>
+
+</html>

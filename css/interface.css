@@ -1,0 +1,365 @@
+html,body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  overflow-y: hidden;
+}
+.bgc_b {
+  background-color: #eee;
+}
+.bgc_w {
+  background-color: #fff;
+}
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.personalInformation {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translateY(-50%);
+  background-color: #eee;
+  z-index: 1;
+}
+.personalInformation .personalInformation_inside {
+  width: 30%;
+  height: 450px;
+  left: 50%;
+  top: 50%;
+  padding: 24px 56px;
+  background-color: #fff;
+  box-shadow: 0 0 4px #333;
+  transform: translateX(-50%) translateY(-50%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  row-gap: 18px;
+  border-radius: 5px;
+}
+.personalInformation .inputcolumn {
+  width: 100%;
+  height: 30px;
+  border: solid 1px #aaa;
+  border-radius: 4px;
+  padding: 0 8px;
+}
+.personalInformation .startbtn{
+  margin-top: 10px;
+  padding: 0px 24px;
+  text-align: center;
+  line-height: 30px;
+  color: #333;
+  background-color: #eee;
+  border: solid 1px #333;
+  width: 60%;
+  border-radius: 5px;
+}
+.personalInformation .startbtn:hover{
+  background-color: #333;
+  color: #eee;
+}
+
+#form {
+  display: flex;
+}
+
+.mainContainer {
+  display: flex;
+}
+.toolBar {
+  display: flex;
+  flex-direction: column;
+  background-color: #eee;
+}
+.toolBar span {
+  color: #333;
+  border-bottom: solid 1px #333;
+  border-right: solid 1px #333;
+  font-size: 24px;
+  font-weight: bold;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+}
+.toolBar .qSelected {
+  color: #eee;
+  background-color: #333;
+}
+.toolBar .qUnselected {
+  color: #333;
+  background-color: #eee;
+}
+
+.container {
+  display: flex;
+}
+
+.question {
+  background-color: #fff;
+  padding: 12px 24px 0;
+  font-size: 16px;
+
+  display: flex;
+  flex-direction: column;
+  row-gap: 12px;
+}
+.question code {
+  text-align: center;
+}
+
+.answer {
+  width: 60%;
+}
+.nav_bar {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  background-color: #eee;
+  justify-content: space-between;
+  padding: 12px 24px;
+}
+.nav_bar .time {
+  border: solid 1px #aaa;
+  height: 40px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  border-radius: 4px;
+  column-gap: 8px;
+  background-color: #fff;
+}
+
+.buttonStyle {
+  background-color: #eee;
+  height: 40px;
+}
+
+#submitbtn {
+  background-color: #0075ff;
+  color: #fff;
+  border: none;
+}
+#submitbtn:hover {
+  background-color: #0a55ad
+  ;
+  /* color: #333; */
+  /* border: solid 1px #333; */
+}
+
+.excutebtn {
+  display: flex;
+  column-gap: 12px;
+}
+.excutebtn input {
+  height: 40px;
+  width: 110px;
+  border: solid 1px #333;
+  background-color: #fff;
+  color: #333;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+.excutebtn input:hover {
+  background-color: #333;
+  color: #eee;
+}
+
+.answer-content {
+  padding: 12px 24px 0;
+}
+.answer-content .inputArea {
+  height: 100px;
+}
+.nav_bar .radioSet{
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  column-gap: 4px;
+}
+.nav_bar .radioSet label{
+  font-weight: 500;
+  margin: 0;
+  padding-right: 8px;
+}
+
+
+.form-control {
+  resize: none;
+}
+
+.refresh {
+    border: solid 1px #aaa;
+    height: 20px;
+    width: 20px;
+    transition: 0.2s;
+    user-select: none;
+    border-radius: 4px;
+}
+.refresh:hover {
+  background-color: #ddd;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#codebox {
+  overflow: hidden;
+  font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
+  tab-size: 4;
+}
+
+.codeIndex {
+  padding: 6px;
+  font-size: 14px;
+  color: #ddd;
+  text-align: center;
+}
+
+.record {
+  user-select: none;
+}
+  .recordbtn {
+    border: none;
+    background-color: #eee;
+    border: solid 1px #aaa;
+    padding: 5px 10px;
+    transition: 0.5s;
+    box-sizing: border-box;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+    border-radius: 4px;
+  }
+  .recordbtn:hover {
+    background-color: #ddd;
+  }
+  .record_content {
+    border: solid 1px #ddd;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
+  .record_content .click {
+    display: inline-block;
+    border: solid 1px #aaa;
+    width:50px;
+    text-align: center;
+  }
+  .record_content ul {
+    padding-left: 0;
+  }
+  .record .column {
+    font-size: 14px;
+    padding-bottom: 8px;
+  }
+  .record .note {
+    display: inline-block;
+    list-style: none;
+    font-size: 14px;
+  }
+  
+  .toolbtn {
+    border: none;
+    background-color: #eee;
+    border: solid 1px #aaa;
+    padding: 5px 10px;
+    transition: 0.5s;
+    box-sizing: border-box;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+    border-radius: 4px;
+  }
+  .toolbtn:hover {
+    background-color: #ddd;
+  }
+  .toolBar .endBtn {
+    font-size: 16px;
+  }
+  .toolBar .endBtn:hover {
+    background-color: #ccc;
+    transition: 0.5s;
+  }
+
+  .chart {
+    position: absolute;
+    top: 0;
+    /* right: 0; */
+    z-index: -1;
+    width: 1000px;
+    visibility: hidden;
+  }
+
+  .chart_content {
+    border: solid 1px #ddd;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
+  .chart_content .click {
+    display: inline-block;
+    border: solid 1px #aaa;
+    width:50px;
+    text-align: center;
+  }
+  .chart_content ul {
+    padding-left: 0;
+  }
+  .chart .column {
+    font-size: 14px;
+    padding-bottom: 8px;
+  }
+  .chart .note {
+    display: inline-block;
+    list-style: none;
+    font-size: 14px;
+  }
+  
+  .circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    height: 20px;
+    width: 20px;
+    /* transform: translateX(-50%) translateY(-50%); */
+    background-color: rgba(197, 224, 218, 0.5);
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  #outputbox {
+    height: 300px;
+    border: solid 1px #ccc;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: scroll;
+  }
+
+  pre {
+    background-color: none;
+    border: none;
+    white-space: pre-wrap;
+    word-break: keep-all;
+  }
