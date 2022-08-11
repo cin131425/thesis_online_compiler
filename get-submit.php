@@ -1,8 +1,5 @@
 <?php
 
-// $link = mysqli_connect("localhost", "test", "cc12345688", "codebehavior");
-// $link -> set_charset("UTF8"); // 設定語系避免亂碼
-
 $postbody = json_decode(file_get_contents('php://input'), true);
 
 // var_dump($postbody);
@@ -18,16 +15,6 @@ $runCode  = $postbody["runCode"];
 $mousePosition  = $postbody["mouse_position"];
 $tab_chart = $postbody["tab_chart"];
 $code  = $postbody["code"];
-
-// // $sql = "INSERT INTO `submit`(`user_id`, `question_index`, `language`, `lineCount`, `wordCount`, `totalTime`, `result`, `runcode`) VALUES ('?','?','?','?','?','?','?','?')";
-// $final = mysqli_query($link, $sql);
-// echo($final);
-
-// // $stmt = $link->prepare($sql) or die("Failed Execution");
-// // $stmt->bind_param('iisiisii', $u_Idx, $q_Idx, $language, $lineCount, $wordCount, $totalTime, $result, $runCode);
-
-// // $stmt->execute();
-// // echo $final;
 
 $connection = new mysqli("localhost", "test", "cc12345688", "codebehavior");
 $connection -> set_charset("UTF8"); // 設定語系避免亂碼

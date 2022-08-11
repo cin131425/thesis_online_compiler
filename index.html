@@ -863,9 +863,7 @@
         function (e) {
           questionPosTop = e.pageY - parseInt(q_offset.top);
           questionPosLeft = e.pageX - q_offset.left;
-          // vm.pageX = questionPosTop;
-          // vm.pageY = questionPosLeft;
-          if (q_mouseCap % 10 == 0) { //調整捕捉mouse的頻率
+          if (q_mouseCap % 10 == 0) { //調整捕捉mouse的頻率，設定是每十筆資料儲存一次
             q_mouseData.datasets[0].data.push({ x: questionPosTop, y: questionPosLeft });
             q_mouseCap = 0;
           }
@@ -876,7 +874,7 @@
         function (e) {
           cursorPosTop = e.pageY - parseInt(offset.top);
           cursorPosLeft = e.pageX - offset.left;
-          if (mouseCap % 10 == 0) { //調整捕捉mouse的頻率
+          if (mouseCap % 10 == 0) { //調整捕捉mouse的頻率，設定是每十筆資料儲存一次
             // console.log(mouseData);
             if (questionArea) {
               if (parseInt(localStorage.getItem('q_idx')) == 0) {
@@ -937,7 +935,6 @@
             else { // (parseInt(localStorage.getItem('q_idx')) == 2) 
               mousePositionData2.code.push({ x: cursorPosTop, y: cursorPosLeft });
             }
-            // mouseData.datasets[1].data.push({ x: cursorPosTop, y: cursorPosLeft });
             mouseCap = 0;
           }
           mouseCap += 1;
@@ -996,8 +993,7 @@
         tabChart.data.labels = columnIndex;
         tabChart.data.datasets[0].data = tabTimePerLine;
 
-        mouseChart.update();
-        
+        mouseChart.update();     
         tabChart.update();
       }
     });
@@ -1027,7 +1023,7 @@
         tabTime: 0,
         textLength: codebox.value.length,
         currentLineNumber: undefined, //判斷目前在第幾行
-        currentColumnIndex: undefined, ////判斷目前行數的index
+        currentColumnIndex: undefined, //判斷目前行數的index
         pageX: undefined,
         pageY: undefined,
         copy: 0,
@@ -1037,7 +1033,6 @@
         redo: 0,
 
         passTime: 0,
-        // columnIndex: [],
         codingMaxIndex: undefined,
         successResult: [],
         errorResult: [],
@@ -1063,13 +1058,10 @@
 
       }
     }
-    // var q_submit = Array(3).fill(0);
     function windowPopUp() {
       let submitResult = confirm('Submit your code?');
       if (submitResult) {
         updateChartFun();
-        // q_submit[parseInt(localStorage.getItem('q_idx'))] = 1;
-        // localStorage.setItem('q_submit', q_submit);
         localStoreLineData = JSON.stringify(storeLineData);
         localStorage.setItem('content', editor.getValue());
         localStorage.setItem("storeLineData", localStoreLineData);
@@ -1081,9 +1073,7 @@
         codeChange = false;
         getLogfile("submit");
         toggleQuestion(vm.questionNum);
-        
         vm.storeLineData = storeLineData;
-
         window.scrollTo(0, 0);
        
       } else {
@@ -1099,7 +1089,6 @@
         localStorage.setItem("storeLineData", localStoreLineData);
         storeTestBehaviorData();
         storeSubmitData();
-        // endChartFun();
         //結束測試
         endTest();
       }
@@ -1162,7 +1151,7 @@
       }
     }
 
-    function toggleQuestion(questionNum) { //換題目
+    function toggleQuestion(questionNum) { //切換題目
       if (codeChange) { //code尚未繳交過
         let submitConfirm = confirm('You have not submitted the program, are you sure to change the question? (Your code will be lost)');
         if (submitConfirm) {
@@ -1185,7 +1174,6 @@
       vm.questionNum = questionNum; //網頁的第幾題
       nowQuestionIndex = selectedSet[questionNum]; //題組的index
       selectQuestion = easyQuestion[nowQuestionIndex]; //該index的題目內容
-
       vm.selectQuestion = selectQuestion;
       vm.selectQuestionIndex = nowQuestionIndex
       localStorage.setItem('q_idx', questionNum);
@@ -1285,14 +1273,6 @@
             // console.log(storeLineData);
             submitfirst = 1;
           }
-          else {
-            // console.log("learndata null");
-            // storeLineData = [];
-            // vm.codingMaxIndex = editor.getValue().split("\n").length;
-            // for (var i = 0; i < vm.codingMaxIndex; i++) {
-            //   storeLineData.push({ 'time': 0, 'backspace': 0, 'delete': 0, 'copy': 0, 'cut': 0, 'paste': 0, 'undo': 0, 'redo': 0 })
-            // }
-          }
         }
       })
     }
@@ -1309,7 +1289,6 @@
 
 
     var nowKeydownNum = undefined;
-
     var textValue = [];
     var nowLineText = "";
     var nowLine = -1;
@@ -1475,13 +1454,10 @@
     var selectAfter;
     var codeChange = false;
     editor.on("keydown", function (cm, e) {
-      // console.log(textValue);
-      // console.log(e);
       if (!codeChange) {
         getLogfile("firstKeyDown");
       }
       codeChange = true;
-      // console.log("codeChange:", codeChange);
       selectBefore = editor.getCursor(true).line;
       selectAfter = editor.getCursor(false).line;
       action = 'key';
@@ -1516,8 +1492,7 @@
 
     var storeText; //儲存editor.getSelection()的文字
     function detectKeyNumTime() {
-      if (nowKeydownNum == 8) {
-        // vm.backspace(); //Backspace鍵  -------need?????????
+      if (nowKeydownNum == 8) { //Backspace鍵
         vm.backspaceTime += 1;
       }
       if (nowKeydownNum == 46) { //Delete鍵
@@ -1533,9 +1508,6 @@
         case 46:
           storeLineData[line - 1].delete += 1;
           break;
-        // case 9:
-        //   tabTimePerLine[line - 1] += 1;
-        //   break;
       }
     }
 
@@ -1562,10 +1534,6 @@
       }
       nowLineText = textValue[cursor.line]; //目前所在行數的text
 
-      // if (cursor.sticky == null) { //切換題目後停止interval
-      //   clearInterval(lt);
-      // }
-      // else {
       if (action == 'key' && (cursor.line + 1) != vm.currentLineNumber) { //用key切換行時才須開始計時
         startTimer(storeLineData[cursor.line].time)
       }
@@ -1607,7 +1575,7 @@
       vm.paste += 1;
     })
 
-    function resultPreprocess(result) { //SQL不能存有'的文字,,<<
+    function resultPreprocess(result) { //因為SQL不能存有'的文字,會有錯誤
       if (result != undefined) {
         return result.replaceAll("'", "''");
       }
@@ -1861,7 +1829,6 @@ pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
             // locate the div with #result and fill it with returned data from process.php
             //result: compiler 完的 output
             //顯示出output area的結果
-
             vm.resulttemp.push(result);
             result = result.substring(4);
             // console.log(result.charAt(5));

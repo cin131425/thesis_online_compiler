@@ -1,7 +1,5 @@
 <?php
 
-// $link = mysqli_connect("localhost", "test", "cc12345688", "codebehavior");
-// $link -> set_charset("UTF8"); // 設定語系避免亂碼
 
 $postbody = json_decode(file_get_contents('php://input'), true);
 // print_r($postbody);
